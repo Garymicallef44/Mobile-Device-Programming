@@ -1,6 +1,6 @@
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
+ 
 
 
 
@@ -13,7 +13,9 @@ export default function Navbar() {
         <SafeAreaProvider>
             <View style={styles.navbar}>
                 <TouchableOpacity style={styles.navButton} onPress={() => {Alert.alert("aye bro")}}>
-                    <Image source={require('../MediaSources/Symbols/Icons/Menu.png')} />
+                    <Image source={require("../MediaSources/Symbols/Icons/Menu.png")}>
+
+                    </Image>
                 </TouchableOpacity>
                 <Text style={styles.title}>Servify</Text>
             </View>
@@ -28,7 +30,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        height: 150,
+        height: 110,
         fontSize: 20,
         width: '100%',
         backgroundColor: 'white',
@@ -39,7 +41,7 @@ const styles = StyleSheet.create({
         fontWeight: '900',
     },
     navButton:{
-        position: 'relative',
-        right: 100,
+       position: 'relative',
+       right: 100,
     }
 })
