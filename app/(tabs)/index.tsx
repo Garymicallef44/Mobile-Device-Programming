@@ -40,7 +40,7 @@ export default function HomeScreen() {
           <View className={"search-bar-section"}>
 
           </View>
-          <ImageBackground source={require('../../MediaSources/Backgrounds/quickservicebg.png')}className={"quick-services-section"} style={styles.quickServicesContainer}>
+          <ImageBackground source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')} imageStyle={{...StyleSheet.absoluteFillObject, resizeMode: "cover"}} resizeMode="stretch" className={"quick-services-section"} style={styles.quickServicesContainer}>
               <Text style={styles.smallTitle}>Quick Service</Text>
               <FlatList numColumns={4} contentContainerStyle={{alignItems:'center', justifyContent: 'center', width: '100%'}} style={styles.quickServices} data={quickServices}
               keyExtractor={(item) => item.id.toString()} renderItem={({ item }) => 
@@ -57,12 +57,8 @@ export default function HomeScreen() {
                 <Text>Hello</Text>
               </View>
             )) }  
-
           </View>
-        
         </>
-
-
   );
 }
 
@@ -83,10 +79,11 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   quickServicesContainer: {
-    width: '100%',
+    width: '105%',
     height: 250,
     padding: 16.5,
     backgroundColor: 'lightgray',
+    backgroundSize: '105%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
