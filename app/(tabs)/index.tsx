@@ -1,7 +1,7 @@
 import Navbar from '@/components/navbar';
 import { collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from 'react';
-import { FlatList, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig";
 
 export default function HomeScreen() {
@@ -14,8 +14,12 @@ export default function HomeScreen() {
     {id: 0, name: "Car Wash", src: require("../../MediaSources/Symbols/car-wash.png")},
     {id: 1, name: "Tyre Change", src: require("../../MediaSources/Symbols/tyrechange.png")},
     {id: 2, name: "Towing", src: require("../../MediaSources/Symbols/towing.png")}
-    
   ]
+
+
+  const garageImages: Record<number, any> = {
+    1 : require(`../../MediaSources/AutoShops/1.jpg`)
+  }
 
   // API Caller to retrieve garages from firestore
   useEffect(() => {
@@ -35,9 +39,9 @@ export default function HomeScreen() {
 
 
   return (
-        <>
+        <ScrollView style={{backgroundColor: 'white'}}>
           <Navbar />
-          <View className={"search-bar-section"}>
+          <View className={"search-bar-section"} style={styles.searchBarContainer}>
 
           </View>
           <ImageBackground source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')} imageStyle={{...StyleSheet.absoluteFillObject, resizeMode: "cover"}} resizeMode="stretch" className={"quick-services-section"} style={styles.quickServicesContainer}>
@@ -50,15 +54,26 @@ export default function HomeScreen() {
                 </TouchableOpacity>}
               />
           </ImageBackground>
-          <View>
-            { garages.map((garage, index) => (
-              <View key={index} style={styles.test}>
-                <Text>{garage.Name}</Text>
-                <Text>Hello</Text>
-              </View>
-            )) }  
+          <View style={styles.servicesContainer}>
+            <Text style={{color: 'black', fontSize: 35, fontWeight: 800}}>Available Nearby</Text>
+            <Text style={{}}>Based on your car details and location.</Text>
+            <View style={styles.servicesContent}> 
+                { garages.map((garage, index) => (
+                  <View key={index} style={styles.serviceContainer}>
+                    <Image style={styles.servicesImage} source={garageImages[garage.Id]}></Image>
+                    <View style={styles.serviceInfo}>
+                      <Text style={{fontSize: 30, fontWeight: 900}}>{garage.Name}</Text>
+                      <Text>{garage.Town}</Text>
+                      {garage.Services.map((service : any, ind : number) => {
+                          <Text>{service}</Text>
+                      })}
+                    </View>
+                  </View>
+                )) }  
+            </View>
+
           </View>
-        </>
+        </ScrollView>
   );
 }
 
@@ -67,6 +82,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  searchBarContainer:{
+    width: "100%",
+    height: 7,
   },
   stepContainer: {
     gap: 8,
@@ -79,7 +98,6 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   quickServicesContainer: {
-    width: '105%',
     height: 250,
     padding: 16.5,
     backgroundColor: 'lightgray',
@@ -89,6 +107,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
+    shadowColor: 'black',
+    shadowOffset: {width: 0, height: 5},
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 10,
   },
     smallTitle:{
     fontSize: 30,
@@ -122,13 +145,41 @@ const styles = StyleSheet.create({
     left: 0,
     position: 'absolute',
   },
-
-  test:{
+  servicesContainer:{
+    height: 500,
+    overflowY: 'scroll',
+    backgroundColor: 'white',
+    display: 'flex',
     flexDirection: 'column',
+    color: 'black',
+    margin: 10,
+  },
+  serviceContainer:{
     alignItems: 'center',
     justifyContent: 'center',
-    height: 290,
+    height: 150,
+    backgroundColor: '#F6F6F6',
+    borderRadius: 10, 
     width: '100%',
-    backgroundColor: 'lightblue',
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  servicesContent:{
+      marginTop: 20,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '90%',
+      alignSelf: 'center'
+  },
+  servicesImage:{
+    width: '25%',
+    height: '100%'
+  },
+  serviceInfo:{
+    display: 'flex',
+    flexDirection: 'column'
+
   }
 });

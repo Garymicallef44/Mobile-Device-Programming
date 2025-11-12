@@ -26,7 +26,6 @@ export default function Navbar() {
 
 const styles = StyleSheet.create({
     navbar:{
-        position: 'absolute',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
