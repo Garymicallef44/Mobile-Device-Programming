@@ -14,13 +14,11 @@ export default function Navbar() {
             <View style={styles.navbar}>
                 <TouchableOpacity style={styles.navButton} onPress={() => {Alert.alert("aye bro")}}>
                     <Image source={require("../MediaSources/Symbols/Icons/Menu.png")}>
-
                     </Image>
                 </TouchableOpacity>
                 <Text style={styles.title}>Servify</Text>
             </View>
         </SafeAreaProvider>
-        
     )
 }
 
@@ -29,15 +27,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        height: 110,
+        height: 150,
         fontSize: 20,
         width: '100%',
         backgroundColor: 'white',
-        color: 'black',
+        color: '#404040',
     },
     title:{
-        fontSize: 30,
-        fontWeight: 'bold',
+        fontSize: 35,
+        fontWeight: '900',
     },
     navButton:{
        position: 'relative',
