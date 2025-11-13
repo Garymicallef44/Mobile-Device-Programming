@@ -1,13 +1,33 @@
 import Navbar from '@/components/navbar';
 import { collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from 'react';
-import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig";
 
 export default function HomeScreen() {
 
 
-  const [garages, setGarages] = useState<any[]>([]);
+
+  type Garage = {
+    Coordinates: number[],
+    Description: string,
+    ElectricService: boolean,
+    Id: number,
+    Latitutde: number,
+    Longitude: number,
+    Location: string,
+    Name: string,
+    Rating: number,
+    Services: string[],
+    Town: string
+  }
+
+  type Garages = {
+    garages: Garage[];
+  }
+
+
+  const [garages, setGarages] = useState<Garage[]>([]);
 
 
   const quickServices = [
@@ -26,9 +46,9 @@ export default function HomeScreen() {
 
     const querySnapshot = async () => {
       const querySnapshot = await getDocs(collection(db, "serviceGarages"));
-      const garages: any[] = [];
+      const garages: Garage[] = [];
       querySnapshot.forEach((doc) => {
-        garages.push(doc.data());
+        garages.push(doc.data() as Garage);
       });
       
       setGarages(garages);
@@ -42,7 +62,12 @@ export default function HomeScreen() {
         <ScrollView style={{backgroundColor: 'white'}}>
           <Navbar />
           <View className={"search-bar-section"} style={styles.searchBarContainer}>
-
+              <View style={styles.searchBar}>
+                <TouchableOpacity style={{height: '50%', width: '10%'}}>
+                  <Image style={{height: '100%', width: '100%'}}source={require('../../MediaSources/Symbols/Icons/Search.png')}></Image>
+                </TouchableOpacity>
+                <TextInput style={{color: 'black', width: '80%'}} placeholder='Search for a garage'></TextInput>
+              </View>
           </View>
           <ImageBackground source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')} imageStyle={{...StyleSheet.absoluteFillObject, resizeMode: "cover"}} resizeMode="stretch" className={"quick-services-section"} style={styles.quickServicesContainer}>
               <Text style={styles.smallTitle}>Quick Service</Text>
@@ -64,7 +89,7 @@ export default function HomeScreen() {
                     <View style={styles.serviceInfo}>
                       <Text style={{fontSize: 30, fontWeight: 900}}>{garage.Name}</Text>
                       <Text>{garage.Town}</Text>
-                      <Text>{garage.Services}</Text>
+                      <Text>{Object.values(garage.Services)}</Text>
                     </View>
                   </View>
                 )) }  
@@ -83,7 +108,27 @@ const styles = StyleSheet.create({
   },
   searchBarContainer:{
     width: "100%",
-    height: 7,
+    height: 100,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  searchBar:{
+    width: '75%',
+    height: 60,
+    color: 'black',
+    gap: 5,
+    backgroundColor: '#F9F9F9',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    shadowColor: 'black',
+    shadowOffset: {width: 0, height: 5},
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 10,
   },
   stepContainer: {
     gap: 8,
@@ -161,7 +206,7 @@ const styles = StyleSheet.create({
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
-    gap: 30
+    gap: 15
   },
   servicesContent:{
       marginTop: 20,
@@ -173,11 +218,11 @@ const styles = StyleSheet.create({
       alignSelf: 'center'
   },
   servicesImage:{
-    width: '25%',
-    height: '70%',
+    width: '40%',
+    height: '90%',
     borderRadius: 20
   },
-  serviceInfo:{
+  serviceInfo:{ 
     display: 'flex',
     flexDirection: 'column'
 
