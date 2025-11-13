@@ -64,9 +64,7 @@ export default function HomeScreen() {
                     <View style={styles.serviceInfo}>
                       <Text style={{fontSize: 30, fontWeight: 900}}>{garage.Name}</Text>
                       <Text>{garage.Town}</Text>
-                      {garage.Services.map((service : any, ind : number) => {
-                          <Text>{service}</Text>
-                      })}
+                      <Text>{garage.Services}</Text>
                     </View>
                   </View>
                 )) }  
@@ -162,7 +160,8 @@ const styles = StyleSheet.create({
     borderRadius: 10, 
     width: '100%',
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    gap: 30
   },
   servicesContent:{
       marginTop: 20,
@@ -175,7 +174,8 @@ const styles = StyleSheet.create({
   },
   servicesImage:{
     width: '25%',
-    height: '100%'
+    height: '70%',
+    borderRadius: 20
   },
   serviceInfo:{
     display: 'flex',
