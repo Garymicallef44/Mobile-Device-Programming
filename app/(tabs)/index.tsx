@@ -1,3 +1,4 @@
+import { GetUserTownAndLocation, UserLocation } from '@/components/getUserLocation';
 import Navbar from '@/components/navbar';
 import { collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from 'react';
@@ -27,6 +28,7 @@ export default function HomeScreen() {
   }
 
 
+  const [userLoc, setUserLoc] = useState<UserLocation | null >();
   const [garages, setGarages] = useState<Garage[]>([]);
 
 
@@ -48,6 +50,7 @@ export default function HomeScreen() {
       const querySnapshot = await getDocs(collection(db, "serviceGarages"));
       const garages: Garage[] = [];
       querySnapshot.forEach((doc) => {
+        
         garages.push(doc.data() as Garage);
       });
       
@@ -57,6 +60,16 @@ export default function HomeScreen() {
     querySnapshot();
   }, [])
 
+
+  // Retrive user's location details
+  useEffect(() => {
+    const retrieveUserLocation =  async () => {
+      const loc = await GetUserTownAndLocation();
+      setUserLoc(loc);
+    }
+
+    retrieveUserLocation();
+  }, [])
 
   return (
         <ScrollView style={{backgroundColor: 'white'}}>
@@ -82,6 +95,7 @@ export default function HomeScreen() {
           <View style={styles.servicesContainer}>
             <Text style={{color: 'black', fontSize: 35, fontWeight: 800}}>Available Nearby</Text>
             <Text style={{}}>Based on your car details and location.</Text>
+            <Text>Your Current Town: {userLoc ? userLoc.town.city : ""}</Text>
             <View style={styles.servicesContent}> 
                 { garages.map((garage, index) => (
                   <View key={index} style={styles.serviceContainer}>
