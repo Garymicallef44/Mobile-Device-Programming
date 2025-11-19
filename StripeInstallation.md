@@ -17,7 +17,7 @@ This guide walks you through setting up Stripe payments in a new Expo applicatio
    * **Google Play Intel x86_64**
 
 ![Android Emulator Setup](https://github.com/user-attachments/assets/7a5e7d4a-c33f-482a-8fa6-54959d0d1ffe)
-
+5. Run the virtual device
 ---
 
 ## **Step 1: Create/Log into Stripe**
@@ -31,7 +31,7 @@ This guide walks you through setting up Stripe payments in a new Expo applicatio
 ## **Step 2: Create a New Expo App**
 
 ```bash
-npx create-expo-app <name-of-app>
+npx create-expo-app (name-of-app)
 ```
 
 ---
@@ -39,7 +39,7 @@ npx create-expo-app <name-of-app>
 ## **Step 3: Enter the App Directory**
 
 ```bash
-cd <name-of-app>
+cd (name-of-app)
 ```
 
 ---
@@ -185,7 +185,20 @@ export default function HomeScreen() {
 
 ---
 
-## **Step 9: Run the App**
+## **Step 9: Add this code to App/_layout.tsx and replace the publishable key**
+```tsx
+import { Stack } from "expo-router";
+import { StripeProvider } from "@stripe/stripe-react-native";
+
+export default function RootLayout() {
+  return (
+    <StripeProvider publishableKey="pk_test_123YOURKEY">
+      <Stack />
+    </StripeProvider>
+  );
+}
+```
+## **Step 10: Run the App**
 On the root directory
 
 ```bash
@@ -196,7 +209,7 @@ Press **A** to open Android emulator.
 
 ---
 
-## **Step 10: Test the Payment**
+## **Step 11: Test the Payment**
 
 1. Tap **Setup Payment**.
 2. Tap **Pay**.
