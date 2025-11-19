@@ -186,6 +186,7 @@ export default function HomeScreen() {
 ---
 
 ## **Step 9: Run the App**
+On the root directory
 
 ```bash
 npx expo start
