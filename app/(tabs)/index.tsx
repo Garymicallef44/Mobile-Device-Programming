@@ -1,6 +1,6 @@
 import { GetUserTownAndLocation, UserLocation } from '@/components/getUserLocation';
 import Navbar from '@/components/navbar';
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query } from "firebase/firestore";
 import { useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig";
@@ -39,34 +39,58 @@ export default function HomeScreen() {
   ]
 
 
+
+
   const garageImages: Record<number, any> = {
-    1 : require(`../../MediaSources/AutoShops/1.jpg`)
+    1 : require(`../../MediaSources/AutoShops/1.jpg`),
+    2 : require(`../../MediaSources/AutoShops/2.jpg`)
   }
 
+  const calculateGarageDistance = () => {
+    
+  }
   // API Caller to retrieve garages from firestore
   useEffect(() => {
 
+    if(!userLoc) {
+      return;
+    }
+
+    
     const querySnapshot = async () => {
-      const querySnapshot = await getDocs(collection(db, "serviceGarages"));
+      // Define query
+      // const dbQ= query(
+      //       collection(db, "serviceGarages"),
+      //       where('Town', '==', userLoc?.town.city))
+
+      const dbQ= query(
+            collection(db, "serviceGarages"))
+
+      const querySnapshot = await getDocs(dbQ);
       const garages: Garage[] = [];
-      querySnapshot.forEach((doc) => {
-        
-        garages.push(doc.data() as Garage);
-      });
-      
+      if (querySnapshot){
+        querySnapshot.forEach((doc) => {
+          garages.push(doc.data() as Garage);
+        });
+      }
+      console.log(garages);
       setGarages(garages);
     }
 
     querySnapshot();
-  }, [])
+  }, [userLoc])
+
 
 
   // Retrive user's location details
   useEffect(() => {
+    let loc;
     const retrieveUserLocation =  async () => {
-      const loc = await GetUserTownAndLocation();
+      loc = await GetUserTownAndLocation();
+      console.log(`Retrieved loc ${loc?.town.city}`)
       setUserLoc(loc);
     }
+    
 
     retrieveUserLocation();
   }, [])
@@ -100,10 +124,10 @@ export default function HomeScreen() {
                 { garages.map((garage, index) => (
                   <View key={index} style={styles.serviceContainer}>
                     <Image style={styles.servicesImage} source={garageImages[garage.Id]}></Image>
-                    <View style={styles.serviceInfo}>
-                      <Text style={{fontSize: 30, fontWeight: 900}}>{garage.Name}</Text>
+                    <View style={styles.serviceInfo}> 
+                      <Text style={{fontSize: 25, fontWeight: 900, width: '100%', flexWrap: 'wrap', flexShrink: 1}}>{garage.Name}</Text>
                       <Text>{garage.Town}</Text>
-                      <Text>{Object.values(garage.Services)}</Text>
+                      <Text style={{width: '40%', flexShrink: 1, flexWrap: 'wrap'}}>{Object.values(garage.Services.slice(0, 3))}</Text>
                     </View>
                   </View>
                 )) }  
@@ -211,34 +235,43 @@ const styles = StyleSheet.create({
     color: 'black',
     margin: 10,
   },
-  serviceContainer:{
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 150,
-    backgroundColor: '#F6F6F6',
-    borderRadius: 10, 
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    gap: 15
-  },
   servicesContent:{
       marginTop: 20,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
+      gap: 15,
       width: '90%',
       alignSelf: 'center'
   },
+  serviceContainer:{
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 150,
+    backgroundColor: '#f2f2f2f2',
+    borderRadius: 10, 
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 25
+  },
+
   servicesImage:{
     width: '40%',
     height: '90%',
-    borderRadius: 20
+    borderRadius: 20,
+    shadowColor: 'black',
+    shadowOffset: {width: 0, height: 5},
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 10,
   },
   serviceInfo:{ 
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    padding: 10,
+    width: '60%'
 
   }
 });
