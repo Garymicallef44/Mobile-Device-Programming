@@ -8,6 +8,11 @@ export type UserLocation = {
   }
 }
 
+export type Coordinates = {
+  latitude : number,
+  longitude : number
+}
+
 export async function GetUserLocation() {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -18,6 +23,25 @@ export async function GetUserLocation() {
       console.log(location);
       return location;
 }
+
+
+export function calculateGarageUserDistance(userLoc : Coordinates, garageLoc : Coordinates){
+
+  const R = 6371; // km
+  const toRad = (x: number) => (x * Math.PI) / 180;
+
+  const dLat = toRad(userLoc.latitude - garageLoc.latitude);
+  const dLon = toRad(userLoc.longitude - garageLoc.longitude);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(userLoc.latitude)) * Math.cos(toRad(garageLoc.latitude)) * Math.sin(dLon / 2) ** 2;
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c;
+}
+
 
 
 export async function GetUserTownAndLocation(){

@@ -1,6 +1,6 @@
 import { GetUserTownAndLocation, UserLocation } from '@/components/getUserLocation';
 import Navbar from '@/components/navbar';
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig";
@@ -10,7 +10,7 @@ export default function HomeScreen() {
 
 
   type Garage = {
-    Coordinates: number[],
+    Coordinates: GeoPoint,
     Description: string,
     ElectricService: boolean,
     Id: number,
@@ -46,9 +46,28 @@ export default function HomeScreen() {
     2 : require(`../../MediaSources/AutoShops/2.jpg`)
   }
 
-  const calculateGarageDistance = () => {
-    
+  const calculateGarageDistance = (gLatitude : number, gLongitude : number) : string => {
+      if (!userLoc) return "Distance unavailable";
+      
+      const R = 6371; // km
+      const toRad = (x: number) => (x * Math.PI) / 180;
+
+      const dLat = toRad(userLoc.coords.lat - gLatitude);
+      const dLon = toRad(userLoc.coords.long - gLongitude);
+
+      
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(userLoc.coords.lat)) * Math.cos(toRad(gLatitude)) * Math.sin(dLon / 2) ** 2;
+
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      const distance = R * c;
+      return `${distance.toFixed(1)} km away`;
   }
+
+
+
   // API Caller to retrieve garages from firestore
   useEffect(() => {
 
@@ -80,6 +99,8 @@ export default function HomeScreen() {
     querySnapshot();
   }, [userLoc])
 
+
+  
 
 
   // Retrive user's location details
@@ -120,18 +141,20 @@ export default function HomeScreen() {
             <Text style={{color: 'black', fontSize: 35, fontWeight: 800}}>Available Nearby</Text>
             <Text style={{}}>Based on your car details and location.</Text>
             <Text>Your Current Town: {userLoc ? userLoc.town.city : ""}</Text>
-            <View style={styles.servicesContent}> 
+            
+            <ScrollView style={styles.servicesContent} contentContainerStyle={{ flexGrow: 1, alignItems: 'center',justifyContent: 'center', gap: 15}}> 
                 { garages.map((garage, index) => (
                   <View key={index} style={styles.serviceContainer}>
                     <Image style={styles.servicesImage} source={garageImages[garage.Id]}></Image>
                     <View style={styles.serviceInfo}> 
-                      <Text style={{fontSize: 25, fontWeight: 900, width: '100%', flexWrap: 'wrap', flexShrink: 1}}>{garage.Name}</Text>
+                      <Text style={{fontSize: 25, fontWeight: '900'}} numberOfLines={2} ellipsizeMode="tail">{garage.Name}</Text>
                       <Text>{garage.Town}</Text>
-                      <Text style={{width: '40%', flexShrink: 1, flexWrap: 'wrap'}}>{Object.values(garage.Services.slice(0, 3))}</Text>
+                      <Text style={{flexShrink: 1}} numberOfLines={2} ellipsizeMode="tail">{garage.Services.slice(0, 3).join(' • ')}</Text>
+                      <Text style={{fontWeight: 800}}>{calculateGarageDistance(garage.Coordinates.latitude, garage.Coordinates.longitude)}</Text>
                     </View>
                   </View>
                 )) }  
-            </View>
+            </ScrollView>
 
           </View>
         </ScrollView>
@@ -178,7 +201,7 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 5,
   },
-  quickServicesContainer: {
+  quickServicesContainer: { 
     height: 250,
     padding: 16.5,
     backgroundColor: 'lightgray',
@@ -239,9 +262,7 @@ const styles = StyleSheet.create({
       marginTop: 20,
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 15,
+      gap: 10,
       width: '90%',
       alignSelf: 'center'
   },
@@ -254,7 +275,8 @@ const styles = StyleSheet.create({
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
-    gap: 25
+    padding: 4,
+    gap: 0
   },
 
   servicesImage:{
