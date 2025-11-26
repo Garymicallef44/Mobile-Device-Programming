@@ -1,12 +1,13 @@
 import { GetUserTownAndLocation, UserLocation } from '@/app/backend/UserLocationService';
 import Navbar from '@/components/navbar';
+import { useNavigation } from "@react-navigation/native";
 import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig";
 
 export default function HomeScreen() {
-
+  const navigation = useNavigation<any>();
 
 
   type Garage = {
@@ -134,19 +135,44 @@ export default function HomeScreen() {
             <Text style={{}}>Based on your car details and location.</Text>
             <Text>Your Current Town: {userLoc ? userLoc.town.city : ""}</Text>
             
-            <ScrollView style={styles.servicesContent} contentContainerStyle={{ flexGrow: 1, alignItems: 'center',justifyContent: 'center', gap: 15}}> 
-                { garages.map((garage, index) => (
-                  <View key={index} style={styles.serviceContainer}>
-                    <Image style={styles.servicesImage} source={garageImages[garage.Id]}></Image>
-                    <View style={styles.serviceInfo}> 
-                      <Text style={{fontSize: 25, fontWeight: '900'}} numberOfLines={2} ellipsizeMode="tail">{garage.Name}</Text>
-                      <Text>{garage.Town}</Text>
-                      <Text style={{flexShrink: 1}} numberOfLines={2} ellipsizeMode="tail">{garage.Services.slice(0, 3).join(' | ')}</Text>
-                      <Text style={{fontWeight: 800}}>{calculateGarageDistance(garage.Coordinates.latitude, garage.Coordinates.longitude)}</Text>
-                    </View>
-                  </View>
-                )) }  
-            </ScrollView>
+            <ScrollView
+  style={styles.servicesContent}
+  contentContainerStyle={{
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 15
+  }}
+>
+  {garages.map((garage, index) => (
+    <TouchableOpacity
+      key={index}
+      style={styles.serviceContainer}
+      onPress={() => navigation.navigate("StorePage", { garage })}
+    >
+      <Image style={styles.servicesImage} source={garageImages[garage.Id]} />
+
+      <View style={styles.serviceInfo}>
+        <Text style={{ fontSize: 25, fontWeight: '900' }} numberOfLines={2} ellipsizeMode="tail">
+          {garage.Name}
+        </Text>
+
+        <Text>{garage.Town}</Text>
+
+        <Text style={{ flexShrink: 1 }} numberOfLines={2} ellipsizeMode="tail">
+          {garage.Services.slice(0, 3).join(' | ')}
+        </Text>
+
+        <Text style={{ fontWeight: 800 }}>
+          {calculateGarageDistance(
+            garage.Coordinates.latitude,
+            garage.Coordinates.longitude
+          )}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
 
           </View>
         </ScrollView>
