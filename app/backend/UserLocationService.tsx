@@ -1,7 +1,27 @@
+
+// This will be used to  retrieve user locations and define functions related to
+// user location
+
+
 import * as Location from 'expo-location';
 
+
+export type TownInfo = {
+   city : string ,
+   country: string, 
+   district: string, 
+   isoCountryCode: string, 
+   name: string, 
+   postalCode: string, 
+   region: string, 
+   street: string, 
+   streetNumber: string, 
+   subregion: string,  
+   timezone: string
+  }
+
 export type UserLocation = {
-  town : object,
+  town : TownInfo,
   coords : {
     lat : number,
     long : number
@@ -12,6 +32,7 @@ export type Coordinates = {
   latitude : number,
   longitude : number
 }
+
 
 export async function GetUserLocation() {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -63,7 +84,7 @@ export async function GetUserTownAndLocation(){
     console.log(userTown[0])
 
     let results : UserLocation = {
-      town : userTown[0],
+      town : userTown[0] as TownInfo,
       coords : {
         lat : location.coords.latitude,
         long : location.coords.longitude
