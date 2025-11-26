@@ -100,10 +100,6 @@ export default function HomeScreen() {
     querySnapshot();
   }, [userLoc])
 
-
-  
-
-
   // Retrive user's location details
   useEffect(() => {
     let loc;
