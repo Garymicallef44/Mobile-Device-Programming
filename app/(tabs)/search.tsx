@@ -143,11 +143,10 @@ const styles = StyleSheet.create({
   image: {
     width: 90,
     height: 90,
-    borderRadius: 12
+    borderRadius: 12    
   },
   title: {
     fontSize: 20,
     fontWeight: "800"
   }
 });
-//tesst
