@@ -1,13 +1,20 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Alert, Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
  
 
 export default function Navbar() {
     const [menuVisible, setMenuVisible] = useState(false);
     const slideAnimation = useRef(new Animated.Value(-Dimensions.get('window').width)).current;
     const insets = useSafeAreaInsets();
+    const router = useRouter();
+
+    const navigateTo = (route: string) => {
+        toggleMenu();
+        router.push(route as any);
+    };
 
     const toggleMenu = () => {
         if (menuVisible) {
@@ -57,29 +64,29 @@ export default function Navbar() {
                         </View>
 
                         <View style={styles.menuItems}>
-                            <TouchableOpacity style={styles.menuItem} onPress={() => Alert.alert("Home")}>
+                            <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)')}>
                                 <Ionicons name="home" size={24} color="#000" style={styles.menuIcon} />
                                 <Text style={styles.menuText}>Home</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.menuItem} onPress={() => Alert.alert("Services")}>
+                            <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)/explore')}>
                                 <Ionicons name="construct" size={24} color="#000" style={styles.menuIcon} />
                                 <Text style={styles.menuText}>Services</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.menuItem} onPress={() => Alert.alert("My Garage")}>
+                            <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)/garage')}>
                                 <Ionicons name="car" size={24} color="#000" style={styles.menuIcon} />
                                 <Text style={styles.menuText}>My Garage</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.menuItem} onPress={() => Alert.alert("Service History")}>
+                            <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Service History", "Service History page does not currently exist"); }}>
                                 <Ionicons name="time" size={24} color="#000" style={styles.menuIcon} />
                                 <Text style={styles.menuText}>Service History</Text>
                             </TouchableOpacity>
                         </View>
 
                         <View style={styles.menuFooter}>
-                            <TouchableOpacity style={styles.menuItem} onPress={() => Alert.alert("Settings")}>
+                            <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Settings", "Settings page does not currently exist"); }}>
                                 <Ionicons name="settings" size={24} color="#000" style={styles.menuIcon} />
                                 <Text style={styles.menuText}>Settings</Text>
                             </TouchableOpacity>
