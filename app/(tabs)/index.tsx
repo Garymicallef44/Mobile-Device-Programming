@@ -2,7 +2,7 @@ import { GetUserTownAndLocation, UserLocation } from '@/app/backend/UserLocation
 import Navbar from '@/components/navbar';
 import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useState } from 'react';
-import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig";
 
 export default function HomeScreen() {
@@ -119,14 +119,6 @@ export default function HomeScreen() {
   return (
         <ScrollView style={{backgroundColor: 'white'}}>
           <Navbar />
-          <View className={"search-bar-section"} style={styles.searchBarContainer}>
-              <View style={styles.searchBar}>
-                <TouchableOpacity style={{height: '50%', width: '10%'}}>
-                  <Image style={{height: '100%', width: '100%'}}source={require('../../MediaSources/Symbols/Icons/Search.png')}></Image>
-                </TouchableOpacity>
-                <TextInput style={{color: 'black', width: '80%'}} placeholder='Search for a garage'></TextInput>
-              </View>
-          </View>
           <ImageBackground source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')} imageStyle={{...StyleSheet.absoluteFillObject, resizeMode: "cover"}} resizeMode="stretch" className={"quick-services-section"} style={styles.quickServicesContainer}>
               <Text style={styles.smallTitle}>Quick Service</Text>
               <FlatList numColumns={4} contentContainerStyle={{alignItems:'center', justifyContent: 'center', width: '100%'}} style={styles.quickServices} data={quickServices}

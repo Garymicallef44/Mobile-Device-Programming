@@ -27,15 +27,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        height: 150,
+        height: 70,
         fontSize: 20,
         width: '100%',
         backgroundColor: 'white',
         color: '#404040',
+        marginTop: 40,
     },
     title:{
         fontSize: 35,
         fontWeight: '900',
+        
     },
     navButton:{
        position: 'relative',

@@ -1,4 +1,4 @@
-import { calculateGarageUserDistance, GetUserTownAndLocation, UserLocation } from "@/components/getUserLocation";
+import { calculateGarageUserDistance, GetUserTownAndLocation, UserLocation } from '@/app/backend/UserLocationService';
 import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
