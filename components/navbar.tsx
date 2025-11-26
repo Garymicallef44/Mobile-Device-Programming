@@ -26,19 +26,21 @@ const styles = StyleSheet.create({
     navbar:{
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        height: 150,
+        justifyContent: 'flex-start',
+        height: 70,
         fontSize: 20,
         width: '100%',
         backgroundColor: 'white',
         color: '#404040',
+        marginTop: 40,
     },
     title:{
         fontSize: 35,
         fontWeight: '900',
+        marginLeft: 85
+        
     },
     navButton:{
-       position: 'relative',
-       right: 100,
+      marginLeft: 20
     }
 })
