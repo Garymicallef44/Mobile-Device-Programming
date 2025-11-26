@@ -116,6 +116,7 @@ export default function HomeScreen() {
   return (
         <ScrollView style={{backgroundColor: 'white'}}>
           <Navbar />
+          <View style={{paddingTop: 90}} />
           <ImageBackground source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')} imageStyle={{...StyleSheet.absoluteFillObject, resizeMode: "cover"}} resizeMode="stretch" className={"quick-services-section"} style={styles.quickServicesContainer}>
               <Text style={styles.smallTitle}>Quick Service</Text>
               <FlatList numColumns={4} contentContainerStyle={{alignItems:'center', justifyContent: 'center', width: '100%'}} style={styles.quickServices} data={quickServices}
