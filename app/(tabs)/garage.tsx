@@ -1,10 +1,24 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+
+import Navbar from "@/components/navbar";
+import { saveUserCarDetails, UserCarDetails } from "../backend/AsyncStorage";
+
 
 export default function CarDetails() {
+
+
+  const [carModel, setCarModel] = useState<string>();
+
+  const [vinNo, setVinNo] = useState<string>();
+
+  const [extraDetail, setExtraDetail] = useState<string>();
+
+
+
+
   const [engineType, setEngineType] = useState<"Electric" | "Gas" | null>(
-    "Electric"
+    "Gas"
   );
   const [fuelType, setFuelType] = useState<"Petrol" | "Diesel" | null>(
     "Petrol"
@@ -16,26 +30,7 @@ export default function CarDetails() {
       contentContainerStyle={{ padding: 20, paddingTop: 40, paddingBottom: 60 }}
     >
       {/* Top Bar */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: 20,
-        }}
-      >
-        <Ionicons name="menu" size={28} />
-        <Text
-          style={{
-            flex: 1,
-            textAlign: "center",
-            fontSize: 22,
-            fontWeight: "700",
-            marginRight: 28,
-          }}
-        >
-          Servify
-        </Text>
-      </View>
+      <Navbar />
 
       {/* Title */}
       <Text
@@ -61,6 +56,7 @@ export default function CarDetails() {
       paddingHorizontal: 12,
       paddingVertical: 10,
     }}
+    onChangeText={(setCarModel)}
   />
 
   {/* Engine Type label under input */}
@@ -83,7 +79,14 @@ export default function CarDetails() {
       return (
         <Pressable
           key={type}
-          onPress={() => setEngineType(type as any)}
+          onPress={() => {
+            if (type == "Electric"){
+              setFuelType(null);
+            }
+            setEngineType(type as any)
+
+          }
+          }
           style={{
             paddingVertical: 6,
             paddingHorizontal: 14,
@@ -118,6 +121,7 @@ export default function CarDetails() {
       paddingHorizontal: 12,
       paddingVertical: 10,
     }}
+    onChangeText={setVinNo}
   />
 
   {/* Fuel Type ONLY when engine is Gas */}
@@ -181,6 +185,7 @@ export default function CarDetails() {
             minHeight: 130,
             textAlignVertical: "top",
           }}
+          onChangeText={setExtraDetail}
         />
       </View>
 
@@ -194,7 +199,23 @@ export default function CarDetails() {
           borderRadius: 20,
           paddingHorizontal: 40,
         }}
-        onPress={() => {}}
+        onPress={() => {
+
+          if (!carModel?.trim() || !vinNo?.trim() || !extraDetail?.trim()){
+            alert("Please fill in all details.")
+            return;
+          }
+          const body: UserCarDetails = {
+            model: carModel!,
+            vNumber: vinNo!,
+            detail: extraDetail!,
+            fuelType: fuelType!,
+            engineType: engineType! 
+          }
+
+          saveUserCarDetails(body);
+
+        }}
       >
         <Text style={{ fontWeight: "700", fontSize: 16 }}>Save Vehicle</Text>
       </Pressable>
