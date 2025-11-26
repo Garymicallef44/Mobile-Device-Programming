@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     navbar:{
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         height: 70,
         fontSize: 20,
         width: '100%',
@@ -37,10 +37,10 @@ const styles = StyleSheet.create({
     title:{
         fontSize: 35,
         fontWeight: '900',
+        marginLeft: 85
         
     },
     navButton:{
-       position: 'relative',
-       right: 100,
+      marginLeft: 20
     }
 })
