@@ -1,4 +1,4 @@
-import { GetUserTownAndLocation, UserLocation } from '@/components/getUserLocation';
+import { GetUserTownAndLocation, UserLocation } from '@/app/backend/UserLocationService';
 import Navbar from '@/components/navbar';
 import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useState } from 'react';
@@ -149,7 +149,7 @@ export default function HomeScreen() {
                     <View style={styles.serviceInfo}> 
                       <Text style={{fontSize: 25, fontWeight: '900'}} numberOfLines={2} ellipsizeMode="tail">{garage.Name}</Text>
                       <Text>{garage.Town}</Text>
-                      <Text style={{flexShrink: 1}} numberOfLines={2} ellipsizeMode="tail">{garage.Services.slice(0, 3).join(' • ')}</Text>
+                      <Text style={{flexShrink: 1}} numberOfLines={2} ellipsizeMode="tail">{garage.Services.slice(0, 3).join(' | ')}</Text>
                       <Text style={{fontWeight: 800}}>{calculateGarageDistance(garage.Coordinates.latitude, garage.Coordinates.longitude)}</Text>
                     </View>
                   </View>
