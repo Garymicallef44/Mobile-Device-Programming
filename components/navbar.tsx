@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
  
 
@@ -63,34 +63,36 @@ export default function Navbar() {
                             </TouchableOpacity>
                         </View>
 
-                        <View style={styles.menuItems}>
-                            <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)')}>
-                                <Ionicons name="home" size={24} color="#000" style={styles.menuIcon} />
-                                <Text style={styles.menuText}>Home</Text>
-                            </TouchableOpacity>
+                        <ScrollView style={styles.menuContent} contentContainerStyle={{ flexGrow: 1 }}>
+                            <View style={styles.menuItems}>
+                                <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)')}>
+                                    <Ionicons name="home" size={24} color="#000" style={styles.menuIcon} />
+                                    <Text style={styles.menuText}>Home</Text>
+                                </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)/explore')}>
-                                <Ionicons name="construct" size={24} color="#000" style={styles.menuIcon} />
-                                <Text style={styles.menuText}>Services</Text>
-                            </TouchableOpacity>
+                                <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)/garage')}>
+                                    <Ionicons name="car" size={24} color="#000" style={styles.menuIcon} />
+                                    <Text style={styles.menuText}>My Garage</Text>
+                                </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)/garage')}>
-                                <Ionicons name="car" size={24} color="#000" style={styles.menuIcon} />
-                                <Text style={styles.menuText}>My Garage</Text>
-                            </TouchableOpacity>
+                                <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Service History", "Service History page does not currently exist"); }}>
+                                    <Ionicons name="time" size={24} color="#000" style={styles.menuIcon} />
+                                    <Text style={styles.menuText}>Service History</Text>
+                                </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Service History", "Service History page does not currently exist"); }}>
-                                <Ionicons name="time" size={24} color="#000" style={styles.menuIcon} />
-                                <Text style={styles.menuText}>Service History</Text>
-                            </TouchableOpacity>
-                        </View>
+                                <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Settings", "Settings page does not currently exist"); }}>
+                                    <Ionicons name="settings" size={24} color="#000" style={styles.menuIcon} />
+                                    <Text style={styles.menuText}>Settings</Text>
+                                </TouchableOpacity>
+                            </View>
 
-                        <View style={styles.menuFooter}>
-                            <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Settings", "Settings page does not currently exist"); }}>
-                                <Ionicons name="settings" size={24} color="#000" style={styles.menuIcon} />
-                                <Text style={styles.menuText}>Settings</Text>
-                            </TouchableOpacity>
-                        </View>
+                            <View style={styles.menuFooter}>
+                                <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Account", "Account page does not currently exist"); }}>
+                                    <Ionicons name="person" size={24} color="#000" style={styles.menuIcon} />
+                                    <Text style={styles.menuText}>Account</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </ScrollView>
                     </Animated.View>
                 </>
             )}
@@ -168,8 +170,10 @@ const styles = StyleSheet.create({
         color: '#000',
         fontWeight: 'bold',
     },
-    menuItems:{
+    menuContent:{
         flex: 1,
+    },
+    menuItems:{
         paddingTop: 20,
     },
     menuItem:{
