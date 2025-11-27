@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
  
 
@@ -59,11 +59,11 @@ export default function Navbar() {
                         <View style={styles.menuHeader}>
                             <Text style={styles.menuTitle}>Menu</Text>
                             <TouchableOpacity onPress={toggleMenu}>
-                                <Text style={styles.closeButton}>◄</Text>
+                                <Ionicons name="chevron-back" size={32} color="#000" />
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView style={styles.menuContent} contentContainerStyle={{ flexGrow: 1 }}>
+                        <View style={styles.menuBody}>
                             <View style={styles.menuItems}>
                                 <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)')}>
                                     <Ionicons name="home" size={24} color="#000" style={styles.menuIcon} />
@@ -92,7 +92,7 @@ export default function Navbar() {
                                     <Text style={styles.menuText}>Account</Text>
                                 </TouchableOpacity>
                             </View>
-                        </ScrollView>
+                        </View>
                     </Animated.View>
                 </>
             )}
@@ -165,10 +165,9 @@ const styles = StyleSheet.create({
         fontWeight: '900',
         color: '#000',
     },
-    closeButton:{
-        fontSize: 28,
-        color: '#000',
-        fontWeight: 'bold',
+    menuBody:{
+        flex: 1,
+        flexDirection: 'column',
     },
     menuContent:{
         flex: 1,
@@ -194,5 +193,6 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#e0e0e0',
         paddingVertical: 10,
+        backgroundColor: 'white',
     }
 })
