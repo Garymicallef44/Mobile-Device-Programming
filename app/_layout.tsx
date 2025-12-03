@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StripeProvider } from "@stripe/stripe-react-native";
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -10,18 +11,27 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
+const stripePk = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <StripeProvider publishableKey={stripePk!}> 
+      <SafeAreaProvider>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen 
+              name="modal" 
+              options={{ presentation: "modal", title: "Modal" }} 
+            />
+          </Stack>
+
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </StripeProvider>
   );
 }
