@@ -1,5 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
+let testDB = new Map<number,string>();
+testDB.set(2,"Tux's Services");
+testDB.set(3,"Gill Bates");
+testDB.set(5,"JeBron Lames");
 type HistoryCardProps={
     id:number,
     hisName:string,
@@ -9,9 +13,19 @@ type HistoryCardProps={
 }
 export default function HistoryCard({id,hisName,garageId,date,location}:HistoryCardProps){
     return(<View style={styles.item}>
-        <Text style={styles.itemText}>
-            {hisName} {date.toLocaleDateString("en-UK")} 
-        </Text>
+        <View style={styles.row}>
+            <Text style={styles.itemText}>
+                {hisName} 
+            </Text>
+        </View>
+        <View style={styles.row}>
+            <MaterialIcons name="schedule" size={20} style={{paddingRight:4}}/>
+            <Text style={styles.locationText}>{date.toLocaleDateString("en-UK")} </Text>
+        </View>
+        <View style={styles.row}>
+            <MaterialIcons name="build" size={17} style={{marginLeft:3}}></MaterialIcons>
+            <Text style={styles.garageText}>{testDB.get(garageId)}</Text>
+        </View>
         <View style={styles.row}>
         <MaterialIcons name="location-on" size={20}/>
         <Text style={styles.locationText}>{location.city}, {location.country}</Text></View>
@@ -37,6 +51,11 @@ const styles = StyleSheet.create({
     row:{
         flexDirection: "row", // make children inline
     alignItems: "center", // vertically center icon and text
-    marginTop: 5,
+    marginTop: 10,
+    
+    },
+    garageText:{
+        fontSize:15,
+        marginLeft:5
     }
 })

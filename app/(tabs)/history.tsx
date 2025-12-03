@@ -1,5 +1,6 @@
 
-import { Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+
 import HistoryCard from "../../components/ui/historyCard";
 export default function HistoryPage(){
     type HistoryInstance = {
@@ -10,28 +11,22 @@ export default function HistoryPage(){
         location:{city:string, country:string}
     }
     //TODO: Load from firebase
-    let instances:HistoryInstance[] = [{id:5,name:"Tire Replacement",garageId:24,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Oil Change",garageId:244,date:new Date(),location:{city:"Sta. Venera",country:"Malta"}},{id:5,name:"Makeover",garageId:244,date:new Date(),location:{city:"Siggiewi",country:"Malta"}}]; 
+    let instances:HistoryInstance[] = [{id:5,name:"Tire Replacement",garageId:2,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Oil Change",garageId:3,date:new Date(),location:{city:"Sta. Venera",country:"Malta"}},{id:5,name:"Makeover",garageId:5,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Tire Replacement",garageId:2,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Oil Change",garageId:3,date:new Date(),location:{city:"Sta. Venera",country:"Malta"}},{id:5,name:"Makeover",garageId:5,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Tire Replacement",garageId:2,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Oil Change",garageId:3,date:new Date(),location:{city:"Sta. Venera",country:"Malta"}},{id:5,name:"Makeover",garageId:5,date:new Date(),location:{city:"Siggiewi",country:"Malta"}}]; 
     //load from firebase
     // we want to create a list of history cards
      return (
-        
+      <ScrollView>
+      
+      
+      
     <View style={{
-        paddingTop:30,
-        paddingLeft:15,
-        paddingRight:15
+      paddingTop:30,
+      paddingLeft:15,
+      paddingRight:15
     }}>
-      <Text
-                style={{
-                  flex: 1,
-                  textAlign: "center",
-                  fontSize: 22,
-                  fontWeight: "700",
-                  marginRight: 28,
-                  height:10
-                }}
-              >
-                History
-              </Text>
+      <Text style={{fontSize:30,textAlign:"center", fontWeight:700}}>Servify</Text>
+      
+      
             
       {instances.map((item)=>(
         <HistoryCard
@@ -44,5 +39,6 @@ export default function HistoryPage(){
         />
       ))}
     </View>
+    </ScrollView>
   );
 }
