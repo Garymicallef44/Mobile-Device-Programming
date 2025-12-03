@@ -1,314 +1,246 @@
-import { GetUserTownAndLocation, UserLocation } from '@/app/backend/UserLocationService';
-import Navbar from '@/components/navbar';
+import { GetUserTownAndLocation, UserLocation } from "@/app/backend/UserLocationService";
+import Navbar from "@/components/navbar";
 import { useNavigation } from "@react-navigation/native";
 import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
-import { useEffect, useState } from 'react';
-import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from "react";
+import {
+  FlatList,
+  Image,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { db } from "../../firebaseConfig";
 
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
-
   type Garage = {
-    Coordinates: GeoPoint,
-    Description: string,
-    ElectricService: boolean,
-    Id: number,
-    Latitutde: number,
-    Longitude: number,
-    Location: string,
-    Name: string,
-    Rating: number,
-    Services: string[],
-    Town: string
-  }
+    Coordinates: GeoPoint;
+    Description: string;
+    ElectricService: boolean;
+    Id: number;
+    Latitutde: number;
+    Longitude: number;
+    Location: string;
+    Name: string;
+    Rating: number;
+    Services: string[];
+    Town: string;
+  };
 
-  type Garages = {
-    garages: Garage[];
-  }
-
-
-  const [userLoc, setUserLoc] = useState<UserLocation | null >();
+  const [userLoc, setUserLoc] = useState<UserLocation | null>(null);
   const [garages, setGarages] = useState<Garage[]>([]);
 
-
   const quickServices = [
-    {id: 0, name: "Car Wash", src: require("../../MediaSources/Symbols/car-wash.png")},
-    {id: 1, name: "Tyre Change", src: require("../../MediaSources/Symbols/tyrechange.png")},
-    {id: 2, name: "Towing", src: require("../../MediaSources/Symbols/towing.png")}
-  ]
-
-
-
+    { id: "qs1", name: "Car Wash", src: require("../../MediaSources/Symbols/car-wash.png") },
+    { id: "qs2", name: "Tyre Change", src: require("../../MediaSources/Symbols/tyrechange.png") },
+    { id: "qs3", name: "Towing", src: require("../../MediaSources/Symbols/towing.png") },
+  ];
 
   const garageImages: Record<number, any> = {
-    1 : require(`../../MediaSources/AutoShops/1.jpg`),
-    2 : require(`../../MediaSources/AutoShops/2.jpg`)
-  }
+    1: require("../../MediaSources/AutoShops/1.jpg"),
+    2: require("../../MediaSources/AutoShops/2.jpg"),
+  };
 
-  const calculateGarageDistance = (gLatitude : number, gLongitude : number) : string => {
-      if (!userLoc) return "Distance unavailable";
-      
-      const R = 6371; // km
-      const toRad = (x: number) => (x * Math.PI) / 180;
+  const calculateGarageDistance = (gLat: number, gLong: number): string => {
+    if (!userLoc) return "Distance unavailable";
 
-      const dLat = toRad(userLoc.coords.lat - gLatitude);
-      const dLon = toRad(userLoc.coords.long - gLongitude);
+    const R = 6371;
+    const toRad = (x: number) => (x * Math.PI) / 180;
 
-      
-      const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(toRad(userLoc.coords.lat)) * Math.cos(toRad(gLatitude)) * Math.sin(dLon / 2) ** 2;
+    const dLat = toRad(userLoc.coords.lat - gLat);
+    const dLon = toRad(userLoc.coords.long - gLong);
 
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(userLoc.coords.lat)) *
+        Math.cos(toRad(gLat)) *
+        Math.sin(dLon / 2) ** 2;
 
-      const distance = R * c;
-      return `${distance.toFixed(1)} km away`;
-  }
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
+    return `${(R * c).toFixed(1)} km away`;
+  };
 
-
-  // API Caller to retrieve garages from firestore
+  // LOAD GARAGES
   useEffect(() => {
 
-    if(!userLoc) {
-      return;
-    }
+    if (!userLoc) return;
 
-    
-    const querySnapshot = async () => {
-      // Define query
-      // const dbQ= query(
-      //       collection(db, "serviceGarages"),
-      //       where('Town', '==', userLoc?.town.city))
+    const loadGarages = async () => {
+      const q = query(collection(db, "serviceGarages"));
+      const snap = await getDocs(q);
 
-      const dbQ= query(
-            collection(db, "serviceGarages"))
+      const items: Garage[] = [];
+      snap.forEach((doc) => items.push(doc.data() as Garage));
 
-      const querySnapshot = await getDocs(dbQ);
-      const garages: Garage[] = [];
-      if (querySnapshot){
-        querySnapshot.forEach((doc) => {
-          garages.push(doc.data() as Garage);
-        });
-      }
-      console.log(garages);
-      setGarages(garages);
-    }
+      setGarages(items.filter((g) => g && g.Id != null));
+    };
 
-    querySnapshot();
-  }, [userLoc])
+    loadGarages();
 
-  // Retrive user's location details
+  }, [userLoc]);
+
+  // LOAD USER LOCATION
   useEffect(() => {
-    let loc;
-    const retrieveUserLocation =  async () => {
-      loc = await GetUserTownAndLocation();
-      console.log(`Retrieved loc ${loc?.town.city}`)
+    const loadLocation = async () => {
+      const loc = await GetUserTownAndLocation();
       setUserLoc(loc);
-    }
-    
+    };
 
-    retrieveUserLocation();
-  }, [])
+    loadLocation();
+  }, []);
 
   return (
-        <ScrollView style={{backgroundColor: 'white'}}>
-          <Navbar />
-          <View style={{paddingTop: 90}} />
-          <ImageBackground source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')} imageStyle={{...StyleSheet.absoluteFillObject, resizeMode: "cover"}} resizeMode="stretch" className={"quick-services-section"} style={styles.quickServicesContainer}>
-              <Text style={styles.smallTitle}>Quick Service</Text>
-              <FlatList numColumns={4} contentContainerStyle={{alignItems:'center', justifyContent: 'center', width: '100%'}} style={styles.quickServices} data={quickServices}
-              keyExtractor={(item) => item.id.toString()} renderItem={({ item }) => 
+  <View style={{ flex: 1 }}>
+    <Navbar />
+
+    <FlatList
+      data={garages}
+      keyExtractor={(item, index) => (item?.Id ?? index).toString()}
+      contentContainerStyle={{ paddingTop: 90, paddingBottom: 40 }}
+
+      ListHeaderComponent={
+        <>
+          {/* QUICK SERVICE SECTION */}
+          <ImageBackground
+            source={require("../../MediaSources/Backgrounds/quickservicebg.jpg")}
+            style={styles.quickServicesContainer}
+            imageStyle={StyleSheet.absoluteFillObject}
+          >
+            <Text style={styles.smallTitle}>Quick Service</Text>
+
+            <FlatList
+              data={quickServices}
+              numColumns={4}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.quickServices}
+              renderItem={({ item }) => (
                 <TouchableOpacity style={styles.quickServiceOption}>
-                    <Image resizeMode={"contain"} style={styles.quickServiceOptionImage} source={item.src} />
-                    <Text style={styles.quickServiceOptionText}>{item.name}</Text>
-                </TouchableOpacity>}
-              />
+                  <Image
+                    resizeMode="contain"
+                    style={styles.quickServiceOptionImage}
+                    source={item.src}
+                  />
+                  <Text style={styles.quickServiceOptionText}>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+            />
           </ImageBackground>
-          <View style={styles.servicesContainer}>
-            <Text style={{color: 'black', fontSize: 35, fontWeight: 800}}>Available Nearby</Text>
-            <Text style={{}}>Based on your car details and location.</Text>
+
+          {/* NEARBY TITLE */}
+          <View style={styles.servicesHeader}>
+            <Text style={styles.servicesTitle}>Available Nearby</Text>
+            <Text>Based on your car details and location.</Text>
             <Text>Your Current Town: {userLoc ? userLoc.town.city : ""}</Text>
-            
-            <ScrollView
-  style={styles.servicesContent}
-  contentContainerStyle={{
-    flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 15
-  }}
->
-  {garages.map((garage, index) => (
-    <TouchableOpacity
-      key={index}
-      style={styles.serviceContainer}
-      onPress={() => navigation.navigate("StorePage", { garage })}
-    >
-      <Image style={styles.servicesImage} source={garageImages[garage.Id]} />
-
-      <View style={styles.serviceInfo}>
-        <Text style={{ fontSize: 25, fontWeight: '900' }} numberOfLines={2} ellipsizeMode="tail">
-          {garage.Name}
-        </Text>
-
-        <Text>{garage.Town}</Text>
-
-        <Text style={{ flexShrink: 1 }} numberOfLines={2} ellipsizeMode="tail">
-          {garage.Services.slice(0, 3).join(' | ')}
-        </Text>
-
-        <Text style={{ fontWeight: 800 }}>
-          {calculateGarageDistance(
-            garage.Coordinates.latitude,
-            garage.Coordinates.longitude
-          )}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  ))}
-</ScrollView>
-
           </View>
-        </ScrollView>
-  );
+        </>
+      }
+
+      renderItem={({ item: garage }) => (
+        <TouchableOpacity
+          style={styles.serviceContainer}
+          onPress={() => navigation.navigate("StorePage", { garage })}
+        >
+          <Image
+            style={styles.servicesImage}
+            source={garageImages[garage.Id] ?? garageImages[1]}
+          />
+
+          <View style={styles.serviceInfo}>
+            <Text style={styles.garageName} numberOfLines={2}>
+              {garage.Name}
+            </Text>
+            <Text>{garage.Town}</Text>
+            <Text numberOfLines={2}>{garage.Services.slice(0, 3).join(" | ")}</Text>
+            <Text style={styles.garageDistance}>
+              {calculateGarageDistance(
+                garage.Coordinates.latitude,
+                garage.Coordinates.longitude
+              )}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      )}
+    />
+  </View>
+);
+
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  searchBarContainer:{
-    width: "100%",
-    height: 100,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  searchBar:{
-    width: '75%',
-    height: 60,
-    color: 'black',
-    gap: 5,
-    backgroundColor: '#F9F9F9',
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    shadowColor: 'black',
-    shadowOffset: {width: 0, height: 5},
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 10,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  quickServices:{
-    display: 'flex',
-    flexDirection: 'row',
-    width: '100%',
-    gap: 5,
-  },
-  quickServicesContainer: { 
+  quickServicesContainer: {
     height: 250,
-    padding: 16.5,
-    backgroundColor: 'lightgray',
-    backgroundSize: '105%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    shadowColor: 'black',
-    shadowOffset: {width: 0, height: 5},
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 10,
+    padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
-    smallTitle:{
+  smallTitle: {
     fontSize: 30,
-    fontWeight: '600',
-    letterSpacing: 2,
-    color: 'white',
+    fontWeight: "600",
+    color: "white",
+    marginBottom: 10,
   },
-  quickServiceOption:{
+  quickServices: {
+    justifyContent: "center",
+    width: "100%",
+  },
+  quickServiceOption: {
     margin: 10,
-    backgroundColor: '#FFBD71',
-    width: '27.5%',
+    backgroundColor: "#FFBD71",
+    width: "25%",
     height: 110,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: '600',
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
   },
-  quickServiceOptionText:{
-    fontSize: 16,
-    fontWeight: '600',
+  quickServiceOptionImage: {
+    width: "80%",
+    height: "55%",
   },
-  quickServiceOptionImage:{
-    width: '90%',
-    height: '60%'
+  quickServiceOptionText: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginTop: 5,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  servicesHeader: {
+    marginTop: 20,
+    paddingHorizontal: 16,
   },
-  servicesContainer:{
-    height: 500,
-    overflowY: 'scroll',
-    backgroundColor: 'white',
-    display: 'flex',
-    flexDirection: 'column',
-    color: 'black',
-    margin: 10,
+  servicesTitle: {
+    fontSize: 35,
+    fontWeight: "800",
+    color: "black",
   },
-  servicesContent:{
-      marginTop: 20,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 10,
-      width: '90%',
-      alignSelf: 'center'
-  },
-  serviceContainer:{
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 150,
-    backgroundColor: '#f2f2f2f2',
-    borderRadius: 10, 
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    padding: 4,
-    gap: 0
-  },
-
-  servicesImage:{
-    width: '40%',
-    height: '90%',
-    borderRadius: 20,
-    shadowColor: 'black',
-    shadowOffset: {width: 0, height: 5},
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 10,
-  },
-  serviceInfo:{ 
-    display: 'flex',
-    flexDirection: 'column',
+  serviceContainer: {
+    flexDirection: "row",
+    backgroundColor: "#f2f2f2",
+    borderRadius: 12,
+    marginVertical: 10,
     padding: 10,
-    width: '60%'
-
-  }
+    marginHorizontal: 16,
+  },
+  servicesImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+  },
+  serviceInfo: {
+    flex: 1,
+    paddingLeft: 12,
+    justifyContent: "center",
+  },
+  garageName: {
+    fontSize: 22,
+    fontWeight: "800",
+    marginBottom: 5,
+  },
+  garageDistance: {
+    marginTop: 5,
+    fontWeight: "700",
+  },
 });

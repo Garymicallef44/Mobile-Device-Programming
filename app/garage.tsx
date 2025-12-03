@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import { ScrollView } from "react-native";
 
 import Navbar from "@/components/navbar";
-import { saveUserCarDetails, UserCarDetails } from "../backend/AsyncStorage";
+import { saveUserCarDetails, UserCarDetails } from "./backend/AsyncStorage";
 
 
 export default function CarDetails() {
@@ -27,10 +28,11 @@ export default function CarDetails() {
   return (
     <>
 
-      <View
-        style={{ flex: 1, backgroundColor: "#fff" }}
-        contentContainerStyle={{paddingBottom: 60 }}
-      >
+        <ScrollView
+    style={{ flex: 1, backgroundColor: "#fff" }}
+    contentContainerStyle={{ paddingBottom: 60 }}
+  >
+
       <Navbar />
         {/* Top Bar */}
 
@@ -224,7 +226,7 @@ export default function CarDetails() {
           <Text style={{ fontWeight: "700", fontSize: 16 }}>Save Vehicle</Text>
         </Pressable>
         </View>
-      </View>
+      </ScrollView>
     </>
   );
 }

@@ -70,10 +70,14 @@ export default function Navbar() {
                                     <Text style={styles.menuText}>Home</Text>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)/garage')}>
+                                <TouchableOpacity
+                                    style={styles.menuItem}
+                                    onPress={() => router.push("/garage")}
+                                    >
                                     <Ionicons name="car" size={24} color="#000" style={styles.menuIcon} />
                                     <Text style={styles.menuText}>My Garage</Text>
                                 </TouchableOpacity>
+
 
                                 <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Service History", "Service History page does not currently exist"); }}>
                                     <Ionicons name="time" size={24} color="#000" style={styles.menuIcon} />
