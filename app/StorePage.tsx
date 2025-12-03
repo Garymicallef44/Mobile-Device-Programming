@@ -1,12 +1,16 @@
+import { garageImages } from "@/components/garageImages";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-
 
 type ServicesList = {
   [id: string] : number
 }
+
+const EuroFormat = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'EUR'
+})
 
 type Garage = {
   Coordinates: any,
@@ -35,24 +39,30 @@ export default function ServicePage() {
 
   const { garage } = route.params; 
 
-  console.log(`Garage services retrieved ${typeof JSON.stringify(garage.Services)}`);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number[]>([]);
 
-  const services = garage.Services;
+  const services = Object.keys(garage.Services);
 
+  const [price, setPrice] = useState<number>(0);
 
-  const toggleSelect = (id: number) => {
-    setSelected((prev) => (prev === id ? null : id));
+  const toggleSelect = (p: number, id: number) => {
+    if (selected.includes(id)){
+      setSelected(prev => prev.filter(x => x !== id))
+      setPrice(price - p)
+    }else {
+      setSelected(prev => [...prev, id])
+      setPrice(price + p)
+    }
+
   };
 
-  useEffect(()=> {
-    console.log(Object.entries(services));
-  }, [])
+ 
 
+ 
   return (
     <ScrollView style={styles.container}>
       <Image
-        source={{ uri: "https://via.placeholder.com/600x300.png" }}
+        source={garageImages[garage.Id] }
         style={styles.headerImage}
       />
 
@@ -70,19 +80,19 @@ export default function ServicePage() {
       <View style={styles.section}>
         <Text style={styles.heading}>Select Services</Text>
 
-        {Object.entries(services).map((s, i) => {
-          const isSelected = false
+        {services.map((s, i) => {
+          let isSelected = selected.includes(i)
           return (
             <TouchableOpacity
               key={i}
               style={[styles.serviceItem, isSelected && styles.selectedItem]}
-              onPress={() => toggleSelect(i)}
+              onPress={() => toggleSelect(garage.Services[s], i)}
             >
               <Text style={[styles.serviceText, isSelected && styles.selectedText]}>
                 {s}
               </Text>
               <Text style={[styles.priceText, isSelected && styles.selectedText]}>
-                {s}
+                {EuroFormat.format(garage.Services[`${s}`])}
               </Text>
             </TouchableOpacity>
           );
@@ -91,9 +101,8 @@ export default function ServicePage() {
 
       <View style={styles.totalBar}>
         <Text style={styles.totalText}>Total</Text>
-        {/* <Text style={styles.totalAmount}>{selected ? services.find(s => s.id === selected)?.price : "€0.00"}</Text> */}
+        <Text style={styles.totalAmount}>{EuroFormat.format(price)}</Text>
       </View>
- 0-[p'\]
       <TouchableOpacity style={styles.orderButton}>
         <Text style={styles.orderButtonText}>Order Service</Text>
       </TouchableOpacity>
