@@ -65,45 +65,7 @@ export default function HomeScreen() {
     return `${(R * c).toFixed(1)} km away`;
   };
 
-<<<<<<< HEAD
   // LOAD GARAGES
-=======
-  const renderGarages = () => {
-
-    return (
-    garages.map((garage, index) => (
-    <TouchableOpacity
-      key={index}
-      style={styles.serviceContainer}
-      onPress={() => navigation.navigate("StorePage", { garage })}
-    >
-      <Image style={styles.servicesImage} source={garageImages[garage.Id]} />
-
-      <View style={styles.serviceInfo}>
-        <Text style={{ fontSize: 25, fontWeight: '900' }} numberOfLines={2} ellipsizeMode="tail">
-          {garage.Name}
-        </Text>
-
-        <Text>{garage.Town}</Text>
-
-        <Text style={{ flexShrink: 1 }} numberOfLines={2} ellipsizeMode="tail">
-          {Object.keys(garage.Services).slice(0, 3).join(' | ')}
-        </Text>
-
-        <Text style={{ fontWeight: 800 }}>
-          {calculateGarageDistance(
-            garage.Coordinates.latitude,
-            garage.Coordinates.longitude
-          )}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  )))
-  }
-
-
-  // API Caller to retrieve garages from firestore
->>>>>>> fc8204c (Update & Fix)
   useEffect(() => {
 
     if (!userLoc) return;
@@ -135,14 +97,7 @@ export default function HomeScreen() {
   return (
   <View style={{ flex: 1 }}>
     <Navbar />
-
-    <FlatList
-      data={garages}
-      keyExtractor={(item, index) => (item?.Id ?? index).toString()}
-      contentContainerStyle={{ paddingTop: 90, paddingBottom: 40 }}
-
-      ListHeaderComponent={
-        <>
+        <View>
           {/* QUICK SERVICE SECTION */}
           <ImageBackground
             source={require("../../MediaSources/Backgrounds/quickservicebg.jpg")}
@@ -153,7 +108,7 @@ export default function HomeScreen() {
 
             <FlatList
               data={quickServices}
-              numColumns={4}
+              numColumns={3}
               scrollEnabled={false}
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.quickServices}
@@ -169,59 +124,49 @@ export default function HomeScreen() {
               )}
             />
           </ImageBackground>
+      </View>
 
+      <View>
           {/* NEARBY TITLE */}
           <View style={styles.servicesHeader}>
             <Text style={styles.servicesTitle}>Available Nearby</Text>
             <Text>Based on your car details and location.</Text>
             <Text>Your Current Town: {userLoc ? userLoc.town.city : ""}</Text>
-<<<<<<< HEAD
-=======
-            
-            <ScrollView
-  style={styles.servicesContent}
-  contentContainerStyle={{
-    flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 15
-  }}
->
-  {garages ? renderGarages(): "Loading "}
-
-</ScrollView>
-
->>>>>>> fc8204c (Update & Fix)
           </View>
-        </>
-      }
 
-      renderItem={({ item: garage }) => (
-        <TouchableOpacity
-          style={styles.serviceContainer}
-          onPress={() => navigation.navigate("StorePage", { garage })}
-        >
-          <Image
-            style={styles.servicesImage}
-            source={garageImages[garage.Id] ?? garageImages[1]}
+          <FlatList
+            data={garages}
+            keyExtractor={(item, index) => (item?.Id ?? index).toString()}
+            renderItem={({ item: garage }) => (
+              <TouchableOpacity
+                style={styles.serviceContainer}
+                onPress={() => navigation.navigate("StorePage", { garage })}
+              >
+                <Image
+                  style={styles.servicesImage}
+                  source={garageImages[garage.Id] ?? garageImages[1]}
+                />
+
+                <View style={styles.serviceInfo}>
+                  <Text style={styles.garageName} numberOfLines={2}>
+                    {garage.Name}
+                  </Text>
+                  <Text>{garage.Town}</Text>
+                  <Text numberOfLines={2}>
+                    {Object.keys(garage.Services).slice(0, 3).join(" | ")}
+                  </Text>
+                  <Text style={styles.garageDistance}>
+                    {calculateGarageDistance(
+                      garage.Coordinates.latitude,
+                      garage.Coordinates.longitude
+                    )}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
           />
 
-          <View style={styles.serviceInfo}>
-            <Text style={styles.garageName} numberOfLines={2}>
-              {garage.Name}
-            </Text>
-            <Text>{garage.Town}</Text>
-            <Text numberOfLines={2}>{garage.Services.slice(0, 3).join(" | ")}</Text>
-            <Text style={styles.garageDistance}>
-              {calculateGarageDistance(
-                garage.Coordinates.latitude,
-                garage.Coordinates.longitude
-              )}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      )}
-    />
+      </View>
   </View>
 );
 
