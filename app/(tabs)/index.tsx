@@ -31,6 +31,13 @@ export default function HomeScreen() {
     Town: string;
   };
 
+  const SERVICE_KEYWORDS: Record<string, string> = {
+  "Car Wash": "wash",
+  "Tyre Change": "tyre",
+  "Towing": "tow"
+  };
+
+
   const [userLoc, setUserLoc] = useState<UserLocation | null>(null);
   const [garages, setGarages] = useState<Garage[]>([]);
 
@@ -45,7 +52,7 @@ export default function HomeScreen() {
     2: require("../../MediaSources/AutoShops/2.jpg"),
   };
 
-  const calculateGarageDistance = (gLat: number, gLong: number): string => {
+  const calculateGarageDistance = (gLat: number, gLong: number): string => {  //Returns a string for ui Purposes
     if (!userLoc) return "Distance unavailable";
 
     const R = 6371;
@@ -64,6 +71,51 @@ export default function HomeScreen() {
 
     return `${(R * c).toFixed(1)} km away`;
   };
+
+  const findNearestGarageForService = (serviceName: string) => {
+  if (!userLoc || garages.length === 0) return null;
+
+  const keyword = SERVICE_KEYWORDS[serviceName];
+  if (!keyword) return null;
+
+  const matching = garages.filter(g => {
+    return Object.keys(g.Services).some(k => k.toLowerCase().includes(keyword));
+  });
+
+  if (matching.length === 0) return null;
+
+  let nearest = null;
+  let nearestDist = Number.MAX_VALUE;
+
+  for (const g of matching) {
+    const dist = distance(
+      userLoc.coords.lat,
+      userLoc.coords.long,
+      g.Coordinates.latitude,
+      g.Coordinates.longitude
+    );
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      nearest = g;
+    }
+  }
+
+  return nearest;
+};
+
+const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {  //Returns a Number
+  const R = 6371;
+  const toRad = (v: number) => (v * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
 
   // LOAD GARAGES
   useEffect(() => {
@@ -113,15 +165,27 @@ export default function HomeScreen() {
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.quickServices}
               renderItem={({ item }) => (
-                <TouchableOpacity style={styles.quickServiceOption}>
-                  <Image
-                    resizeMode="contain"
-                    style={styles.quickServiceOptionImage}
-                    source={item.src}
-                  />
-                  <Text style={styles.quickServiceOptionText}>{item.name}</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={styles.quickServiceOption}
+                onPress={() => {
+                  const nearest = findNearestGarageForService(item.name);
+
+                  if (!nearest) {
+                    alert("No garage offers this service nearby.");
+                    return;
+                  }
+
+                  navigation.navigate("StorePage", { garage: nearest });
+                }}
+              >
+                <Image
+                  resizeMode="contain"
+                  style={styles.quickServiceOptionImage}
+                  source={item.src}
+                />
+                <Text style={styles.quickServiceOptionText}>{item.name}</Text>
+              </TouchableOpacity>
+            )}
             />
           </ImageBackground>
       </View>
