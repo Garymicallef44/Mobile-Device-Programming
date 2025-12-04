@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
+import { useRoute } from "@react-navigation/native";
+import { useStripe } from "@stripe/stripe-react-native";
+import * as Location from "expo-location";
+import { useEffect, useState } from "react";
 import {
-  View,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
+  View,
 } from "react-native";
-import * as Location from "expo-location";
-import MapView, { Marker, MapPressEvent, Region } from "react-native-maps";
-import { useStripe } from "@stripe/stripe-react-native";
-import { useRoute } from "@react-navigation/native";
+import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
 
 export default function OrderDetailsPage() {
   const route = useRoute<any>();
-  const { garage, cart, services } = route.params;
+  const { garage, price, services } = route.params;
 
   const stripe = useStripe();
 
@@ -36,7 +36,7 @@ export default function OrderDetailsPage() {
 
   if (status !== "granted") {
     const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
-    if (newStatus !== "granted") {yeah
+    if (newStatus !== "granted") {
       alert("Location permission required.");
       return;
     }
@@ -67,11 +67,6 @@ export default function OrderDetailsPage() {
     updateMapToLocation(latitude, longitude);
   };
 
-  // CART TOTAL
-  const selectedPrice = cart.reduce((sum: number, id: string) => {
-    const s = services.find((s: any) => s.id === id);
-    return sum + (s?.price ?? 0);
-  }, 0);
 
   // PAYMENT
   const payNow = async () => {
@@ -81,7 +76,7 @@ export default function OrderDetailsPage() {
     const response = await fetch("http://10.0.2.2:3000/create-payment-intent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: selectedPrice }),
+      body: JSON.stringify({ amount: price}),
     });
 
     const json = await response.json();
@@ -149,7 +144,7 @@ export default function OrderDetailsPage() {
       <View style={styles.totalBox}>
         <Text style={styles.totalText}>Total</Text>
         <Text style={styles.totalAmount}>
-          €{(selectedPrice / 100).toFixed(2)}
+          {price}
         </Text>
       </View>
 
