@@ -61,7 +61,7 @@ export default function SearchPage() {
     return garages.filter(g =>
       g.Name.toLowerCase().includes(q) ||
       g.Town.toLowerCase().includes(q) ||
-      g.Services.join(" ").toLowerCase().includes(q)
+      Object.keys(g.Services).join(" ").toLowerCase().includes(q)
     );
   }, [queryText, garages]);
 
@@ -99,7 +99,7 @@ export default function SearchPage() {
           <View style={{ flex: 1 }}>
             <Text style={styles.title}>{garage.Name}</Text>
             <Text>{garage.Town}</Text>
-            <Text numberOfLines={1}>{garage.Services.slice(0, 3).join(" • ")}</Text>
+            <Text numberOfLines={1}>{Object.keys(garage.Services).slice(0, 3).join(" • ")}</Text>
             <Text style={{ fontWeight: "700" }}>
               {userLoc
                 ? `${calculateGarageUserDistance(

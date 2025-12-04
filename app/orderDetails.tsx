@@ -14,7 +14,7 @@ import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
 
 export default function OrderDetailsPage() {
   const route = useRoute<any>();
-  const { garage, cart, services } = route.params;
+  const { garage, price, services } = route.params;
 
   const stripe = useStripe();
 
@@ -68,17 +68,13 @@ export default function OrderDetailsPage() {
     updateMapToLocation(latitude, longitude);
   };
 
-  // CART TOTAL (Stripe amount in cents)
-  const selectedPrice = cart.reduce((sum: number, id: string) => {
-    const s = services.find((s: any) => s.id === id);
-    return sum + (s?.price ?? 0);
-  }, 0);
+  // Total amount in cents (already passed in as price)
+  const totalAmountCents: number = price;
 
-  // Services paid for – list of names
-  const servicesPaidFor: string[] = cart
-    .map((id: string) => services.find((s: any) => s.id === id))
-    .filter(Boolean)
-    .map((s: any) => s.name || s.title || `Service ${s.id}`);
+  // Services paid for – list of names (from services array)
+  const servicesPaidFor: string[] = (services as any[]).map(
+    (s: any) => s.name || s.title || `Service ${s.id}`
+  );
 
   // PAYMENT
   const payNow = async () => {
@@ -90,7 +86,7 @@ export default function OrderDetailsPage() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: selectedPrice }),
+        body: JSON.stringify({ amount: totalAmountCents }),
       }
     );
 
@@ -110,8 +106,8 @@ export default function OrderDetailsPage() {
       alert("Payment failed");
     } else {
       // success
-      const totalCostEuro = (selectedPrice / 100).toFixed(2);
-      const eta = "30 minutes"; // for now (can be modified depending on distance/time of day etc)
+      const totalCostEuro = (totalAmountCents / 100).toFixed(2);
+      const eta = "30 minutes"; // can later be made dynamic
 
       router.push({
         pathname: "/payment-summary",
@@ -171,7 +167,7 @@ export default function OrderDetailsPage() {
       <View style={styles.totalBox}>
         <Text style={styles.totalText}>Total</Text>
         <Text style={styles.totalAmount}>
-          €{(selectedPrice / 100).toFixed(2)}
+          €{(totalAmountCents / 100).toFixed(2)}
         </Text>
       </View>
 
