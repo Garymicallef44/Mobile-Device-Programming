@@ -10,7 +10,6 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
 
-<<<<<<< HEAD
   type Garage = {
     Coordinates: GeoPoint,
     Description: string,
@@ -31,17 +30,13 @@ export default function HomeScreen() {
 
 
   const [userLoc, setUserLoc] = useState<UserLocation | null >();
-=======
+  const [garages, setGarages] = useState<Garage[]>([]);
+
   const SERVICE_KEYWORDS: Record<string, string> = {
   "Car Wash": "wash",
   "Tyre Change": "tyre",
   "Towing": "tow"
   };
-
-
-  const [userLoc, setUserLoc] = useState<UserLocation | null>(null);
->>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
-  const [garages, setGarages] = useState<Garage[]>([]);
 
 
   const quickServices = [
@@ -50,23 +45,12 @@ export default function HomeScreen() {
     {id: 2, name: "Towing", src: require("../../MediaSources/Symbols/towing.png")}
   ]
 
-  const SERVICE_KEYWORDS: Record<string, string> = {
-  "Car Wash": "wash",
-  "Tyre Change": "tyre",
-  "Towing": "tow"
-  };
 
-<<<<<<< HEAD
-  // returns distance as a string for ui
   const calculateGarageDistance = (gLatitude : number, gLongitude : number) : string => {
       if (!userLoc) return "Distance unavailable";
       
       const R = 6371; // km
       const toRad = (x: number) => (x * Math.PI) / 180;
-=======
-  const calculateGarageDistance = (gLat: number, gLong: number): string => {  //Returns a string for ui Purposes
-    if (!userLoc) return "Distance unavailable";
->>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
 
       const dLat = toRad(userLoc.coords.lat - gLatitude);
       const dLon = toRad(userLoc.coords.long - gLongitude);
@@ -82,67 +66,53 @@ export default function HomeScreen() {
       return `${distance.toFixed(1)} km away`;
   }
 
-  const findNearestGarageForService = (serviceName: string) => {
-  if (!userLoc || garages.length === 0) return null;
+    const findNearestGarageForService = (serviceName: string) => {
+    if (!userLoc || garages.length === 0) return null;
 
-<<<<<<< HEAD
-=======
-  const findNearestGarageForService = (serviceName: string) => {
-  if (!userLoc || garages.length === 0) return null;
+    const keyword = SERVICE_KEYWORDS[serviceName];
+    if (!keyword) return null;
 
->>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
-  const keyword = SERVICE_KEYWORDS[serviceName];
-  if (!keyword) return null;
+    const matching = garages.filter(g => {
+      return Object.keys(g.Services).some(k => k.toLowerCase().includes(keyword));
+    });
 
-  const matching = garages.filter(g => {
-    return Object.keys(g.Services).some(k => k.toLowerCase().includes(keyword));
-  });
+    if (matching.length === 0) return null;
 
-  if (matching.length === 0) return null;
+    let nearest = null;
+    let nearestDist = Number.MAX_VALUE;
 
-  let nearest = null;
-  let nearestDist = Number.MAX_VALUE;
-
-  for (const g of matching) {
-    const dist = distance(
-      userLoc.coords.lat,
-      userLoc.coords.long,
-      g.Coordinates.latitude,
-      g.Coordinates.longitude
-    );
-    if (dist < nearestDist) {
-      nearestDist = dist;
-      nearest = g;
+    for (const g of matching) {
+      const dist = distance(
+        userLoc.coords.lat,
+        userLoc.coords.long,
+        g.Coordinates.latitude,
+        g.Coordinates.longitude
+      );
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = g;
+      }
     }
-  }
 
-  return nearest;
-};
+    return nearest;
+  };
 
-<<<<<<< HEAD
-// Returns distances as a number
-const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-=======
-const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {  //Returns a Number
->>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
-  const R = 6371;
-  const toRad = (v: number) => (v * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
+  // raw distance calculation
+  const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371;
+    const toRad = (v: number) => (v * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
 
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
 
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
 
 
-<<<<<<< HEAD
   // API Caller to retrieve garages from firestore
-=======
-  // LOAD GARAGES
->>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
   useEffect(() => {
 
     if(!userLoc) {
@@ -194,50 +164,16 @@ const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {  
               <Text style={styles.smallTitle}>Quick Service</Text>
               <View style={{height: 100}}>
                 <FlatList numColumns={4} contentContainerStyle={{alignItems:'center', justifyContent: 'center', width: '100%'}} style={styles.quickServices} data={quickServices}
-                nestedScrollEnabled={true} scrollEnabled={true} keyExtractor={(item) => item.id.toString()}renderItem={({ item }) => 
+                nestedScrollEnabled={true} scrollEnabled={true} keyExtractor={(item) => item.id.toString()} renderItem={({ item }) => 
                   <TouchableOpacity
                     style={styles.quickServiceOption}
                     onPress={() => {
                       const nearest = findNearestGarageForService(item.name);
 
-<<<<<<< HEAD
                       if (!nearest) {
                         alert("No garage offers this service nearby.");
                         return;
                       }
-=======
-            <FlatList
-              data={quickServices}
-              numColumns={3}
-              scrollEnabled={false}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.quickServices}
-              renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.quickServiceOption}
-                onPress={() => {
-                  const nearest = findNearestGarageForService(item.name);
-
-                  if (!nearest) {
-                    alert("No garage offers this service nearby.");
-                    return;
-                  }
-
-                  navigation.navigate("StorePage", { garage: nearest });
-                }}
-              >
-                <Image
-                  resizeMode="contain"
-                  style={styles.quickServiceOptionImage}
-                  source={item.src}
-                />
-                <Text style={styles.quickServiceOptionText}>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-            />
-          </ImageBackground>
-      </View>
->>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
 
                       navigation.navigate("StorePage", { garage: nearest });
                     }}
@@ -248,7 +184,8 @@ const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {  
                       source={item.src}
                     />
                     <Text style={styles.quickServiceOptionText}>{item.name}</Text>
-                  </TouchableOpacity>}
+                  </TouchableOpacity>
+                  }
                 />
  
               </View>
