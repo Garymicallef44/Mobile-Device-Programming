@@ -1,5 +1,6 @@
 import { garageImages } from "@/components/garageImages";
 import { RouteProp, useRoute } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import { useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -11,6 +12,8 @@ const EuroFormat = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'EUR'
 })
+
+
 
 type Garage = {
   Coordinates: any,
@@ -34,6 +37,8 @@ type ServicePageRouteParams = {
 
 export default function ServicePage() {
   const route = useRoute<RouteProp<ServicePageRouteParams, "StorePage">>();
+
+  const navigation = useNavigation<any>();
 
   const [selectedServices, setSelectedServices] = useState<string[]>([])
 
@@ -103,8 +108,16 @@ export default function ServicePage() {
         <Text style={styles.totalText}>Total</Text>
         <Text style={styles.totalAmount}>{EuroFormat.format(price)}</Text>
       </View>
-      <TouchableOpacity style={styles.orderButton}>
-        <Text style={styles.orderButtonText}>Order Service</Text>
+      <TouchableOpacity style={styles.orderButton}
+      >
+        <Text style={styles.orderButtonText}        
+        onPress={() =>
+          navigation.navigate("orderDetails", {
+            garage: garage,
+            price: EuroFormat.format(price),
+            services: services,
+          })
+        }>Order Service</Text>
       </TouchableOpacity>
     </ScrollView>
   );
