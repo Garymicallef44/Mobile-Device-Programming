@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
+import { useRoute } from "@react-navigation/native";
+import { useStripe } from "@stripe/stripe-react-native";
+import * as Location from "expo-location";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
+  View,
 } from "react-native";
-import * as Location from "expo-location";
-import MapView, { Marker, MapPressEvent, Region } from "react-native-maps";
-import { useStripe } from "@stripe/stripe-react-native";
-import { useRoute } from "@react-navigation/native";
+import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
 
 export default function OrderDetailsPage() {
   const route = useRoute<any>();
@@ -32,23 +33,23 @@ export default function OrderDetailsPage() {
   }, []);
 
   const requestLocation = async () => {
-  const { status, canAskAgain } = await Location.getForegroundPermissionsAsync();
+    const { status } = await Location.getForegroundPermissionsAsync();
 
-  if (status !== "granted") {
-    const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
-    if (newStatus !== "granted") {yeah
-      alert("Location permission required.");
-      return;
+    if (status !== "granted") {
+      const { status: newStatus } =
+        await Location.requestForegroundPermissionsAsync();
+      if (newStatus !== "granted") {
+        alert("Location permission required.");
+        return;
+      }
     }
-  }
 
-  const loc = await Location.getCurrentPositionAsync({
-    accuracy: Location.Accuracy.High,
-  });
+    const loc = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+    });
 
-  updateMapToLocation(loc.coords.latitude, loc.coords.longitude);
-};
-
+    updateMapToLocation(loc.coords.latitude, loc.coords.longitude);
+  };
 
   const updateMapToLocation = (lat: number, lng: number) => {
     setRegion({
@@ -67,22 +68,31 @@ export default function OrderDetailsPage() {
     updateMapToLocation(latitude, longitude);
   };
 
-  // CART TOTAL
+  // CART TOTAL (Stripe amount in cents)
   const selectedPrice = cart.reduce((sum: number, id: string) => {
     const s = services.find((s: any) => s.id === id);
     return sum + (s?.price ?? 0);
   }, 0);
+
+  // Services paid for – list of names
+  const servicesPaidFor: string[] = cart
+    .map((id: string) => services.find((s: any) => s.id === id))
+    .filter(Boolean)
+    .map((s: any) => s.name || s.title || `Service ${s.id}`);
 
   // PAYMENT
   const payNow = async () => {
     if (!phone) return alert("Please enter phone number");
     if (!gps) return alert("Please select a location on the map");
 
-    const response = await fetch("http://10.0.2.2:3000/create-payment-intent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: selectedPrice }),
-    });
+    const response = await fetch(
+      "http://10.0.2.2:3000/create-payment-intent",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: selectedPrice }),
+      }
+    );
 
     const json = await response.json();
     const clientSecret = json.clientSecret;
@@ -96,8 +106,22 @@ export default function OrderDetailsPage() {
 
     const payment = await stripe.presentPaymentSheet();
 
-    if (payment.error) alert("Payment failed");
-    else alert("Payment complete!");
+    if (payment.error) {
+      alert("Payment failed");
+    } else {
+      // success
+      const totalCostEuro = (selectedPrice / 100).toFixed(2);
+      const eta = "30 minutes"; // for now (can be modified depending on distance/time of day etc)
+
+      router.push({
+        pathname: "/payment-summary",
+        params: {
+          services: JSON.stringify(servicesPaidFor),
+          totalCost: totalCostEuro,
+          eta,
+        },
+      });
+    }
   };
 
   return (
@@ -115,13 +139,11 @@ export default function OrderDetailsPage() {
       />
 
       {/* Map */}
-      <Text style={[styles.label, { marginTop: 20 }]}>Select Service Location</Text>
+      <Text style={[styles.label, { marginTop: 20 }]}>
+        Select Service Location
+      </Text>
 
-      <MapView
-        style={styles.map}
-        region={region}
-        onPress={onMapPress}
-      >
+      <MapView style={styles.map} region={region} onPress={onMapPress}>
         {gps && (
           <Marker
             draggable
@@ -134,7 +156,7 @@ export default function OrderDetailsPage() {
         )}
       </MapView>
 
-      {/* ⭐ NEW BUTTON: Use Current Location */}
+      {/* Use Current Location */}
       <TouchableOpacity style={styles.gpsButton} onPress={requestLocation}>
         <Text style={styles.gpsButtonText}>Use Current Location</Text>
       </TouchableOpacity>
