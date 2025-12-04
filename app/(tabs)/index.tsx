@@ -32,6 +32,12 @@ export default function HomeScreen() {
   const [userLoc, setUserLoc] = useState<UserLocation | null >();
   const [garages, setGarages] = useState<Garage[]>([]);
 
+  const SERVICE_KEYWORDS: Record<string, string> = {
+  "Car Wash": "wash",
+  "Tyre Change": "tyre",
+  "Towing": "tow"
+  };
+
 
   const quickServices = [
     {id: 0, name: "Car Wash", src: require("../../MediaSources/Symbols/car-wash.png")},
@@ -60,6 +66,50 @@ export default function HomeScreen() {
       return `${distance.toFixed(1)} km away`;
   }
 
+    const findNearestGarageForService = (serviceName: string) => {
+    if (!userLoc || garages.length === 0) return null;
+
+    const keyword = SERVICE_KEYWORDS[serviceName];
+    if (!keyword) return null;
+
+    const matching = garages.filter(g => {
+      return Object.keys(g.Services).some(k => k.toLowerCase().includes(keyword));
+    });
+
+    if (matching.length === 0) return null;
+
+    let nearest = null;
+    let nearestDist = Number.MAX_VALUE;
+
+    for (const g of matching) {
+      const dist = distance(
+        userLoc.coords.lat,
+        userLoc.coords.long,
+        g.Coordinates.latitude,
+        g.Coordinates.longitude
+      );
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = g;
+      }
+    }
+
+    return nearest;
+  };
+
+  // raw distance calculation
+  const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371;
+    const toRad = (v: number) => (v * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
 
 
   // API Caller to retrieve garages from firestore
@@ -115,10 +165,27 @@ export default function HomeScreen() {
               <View style={{height: 100}}>
                 <FlatList numColumns={4} contentContainerStyle={{alignItems:'center', justifyContent: 'center', width: '100%'}} style={styles.quickServices} data={quickServices}
                 nestedScrollEnabled={true} scrollEnabled={true} keyExtractor={(item) => item.id.toString()} renderItem={({ item }) => 
-                  <TouchableOpacity style={styles.quickServiceOption}>
-                      <Image resizeMode={"contain"} style={styles.quickServiceOptionImage} source={item.src} />
-                      <Text style={styles.quickServiceOptionText}>{item.name}</Text>
-                  </TouchableOpacity>}
+                  <TouchableOpacity
+                    style={styles.quickServiceOption}
+                    onPress={() => {
+                      const nearest = findNearestGarageForService(item.name);
+
+                      if (!nearest) {
+                        alert("No garage offers this service nearby.");
+                        return;
+                      }
+
+                      navigation.navigate("StorePage", { garage: nearest });
+                    }}
+                  >
+                    <Image
+                      resizeMode={"contain"}
+                      style={styles.quickServiceOptionImage}
+                      source={item.src}
+                    />
+                    <Text style={styles.quickServiceOptionText}>{item.name}</Text>
+                  </TouchableOpacity>
+                  }
                 />
  
               </View>

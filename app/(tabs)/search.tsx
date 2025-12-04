@@ -1,7 +1,8 @@
 import { calculateGarageUserDistance, GetUserTownAndLocation, UserLocation } from '@/app/backend/UserLocationService';
+import { useNavigation } from "@react-navigation/native";
 import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import { db } from "../../firebaseConfig";
 
@@ -23,6 +24,8 @@ export default function SearchPage() {
   const [userLoc, setUserLoc] = useState<UserLocation | null>(null);
   const [garages, setGarages] = useState<Garage[]>([]);
   const [queryText, setQueryText] = useState("");
+
+  const navigation = useNavigation<any>();
 
   const garageImages: Record<number, any> = {
     1: require("../../MediaSources/AutoShops/1.jpg"),
@@ -94,12 +97,18 @@ export default function SearchPage() {
     {/* RESULTS */}
     <ScrollView contentContainerStyle={{ paddingVertical: 20, gap: 15 }}>
       {filtered.map((garage, index) => (
-        <View key={index} style={styles.card}>
+        <TouchableOpacity
+          key={index}
+          style={styles.card}
+          onPress={() => navigation.navigate("StorePage", { garage })}
+        >
           <Image style={styles.image} source={garageImages[garage.Id]} />
+
           <View style={{ flex: 1 }}>
             <Text style={styles.title}>{garage.Name}</Text>
             <Text>{garage.Town}</Text>
             <Text numberOfLines={1}>{Object.keys(garage.Services).slice(0, 3).join(" • ")}</Text>
+
             <Text style={{ fontWeight: "700" }}>
               {userLoc
                 ? `${calculateGarageUserDistance(
@@ -109,8 +118,9 @@ export default function SearchPage() {
                 : "Distance unavailable"}
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
       ))}
+
 
       {filtered.length === 0 && (
         <Text style={{ textAlign: "center", marginTop: 50 }}>
