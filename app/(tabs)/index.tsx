@@ -10,6 +10,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
 
+<<<<<<< HEAD
   type Garage = {
     Coordinates: GeoPoint,
     Description: string,
@@ -30,6 +31,16 @@ export default function HomeScreen() {
 
 
   const [userLoc, setUserLoc] = useState<UserLocation | null >();
+=======
+  const SERVICE_KEYWORDS: Record<string, string> = {
+  "Car Wash": "wash",
+  "Tyre Change": "tyre",
+  "Towing": "tow"
+  };
+
+
+  const [userLoc, setUserLoc] = useState<UserLocation | null>(null);
+>>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
   const [garages, setGarages] = useState<Garage[]>([]);
 
 
@@ -45,12 +56,17 @@ export default function HomeScreen() {
   "Towing": "tow"
   };
 
+<<<<<<< HEAD
   // returns distance as a string for ui
   const calculateGarageDistance = (gLatitude : number, gLongitude : number) : string => {
       if (!userLoc) return "Distance unavailable";
       
       const R = 6371; // km
       const toRad = (x: number) => (x * Math.PI) / 180;
+=======
+  const calculateGarageDistance = (gLat: number, gLong: number): string => {  //Returns a string for ui Purposes
+    if (!userLoc) return "Distance unavailable";
+>>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
 
       const dLat = toRad(userLoc.coords.lat - gLatitude);
       const dLon = toRad(userLoc.coords.long - gLongitude);
@@ -69,6 +85,12 @@ export default function HomeScreen() {
   const findNearestGarageForService = (serviceName: string) => {
   if (!userLoc || garages.length === 0) return null;
 
+<<<<<<< HEAD
+=======
+  const findNearestGarageForService = (serviceName: string) => {
+  if (!userLoc || garages.length === 0) return null;
+
+>>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
   const keyword = SERVICE_KEYWORDS[serviceName];
   if (!keyword) return null;
 
@@ -97,8 +119,12 @@ export default function HomeScreen() {
   return nearest;
 };
 
+<<<<<<< HEAD
 // Returns distances as a number
 const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+=======
+const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {  //Returns a Number
+>>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
   const R = 6371;
   const toRad = (v: number) => (v * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
@@ -112,7 +138,11 @@ const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
 };
 
 
+<<<<<<< HEAD
   // API Caller to retrieve garages from firestore
+=======
+  // LOAD GARAGES
+>>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
   useEffect(() => {
 
     if(!userLoc) {
@@ -170,10 +200,44 @@ const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
                     onPress={() => {
                       const nearest = findNearestGarageForService(item.name);
 
+<<<<<<< HEAD
                       if (!nearest) {
                         alert("No garage offers this service nearby.");
                         return;
                       }
+=======
+            <FlatList
+              data={quickServices}
+              numColumns={3}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.quickServices}
+              renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.quickServiceOption}
+                onPress={() => {
+                  const nearest = findNearestGarageForService(item.name);
+
+                  if (!nearest) {
+                    alert("No garage offers this service nearby.");
+                    return;
+                  }
+
+                  navigation.navigate("StorePage", { garage: nearest });
+                }}
+              >
+                <Image
+                  resizeMode="contain"
+                  style={styles.quickServiceOptionImage}
+                  source={item.src}
+                />
+                <Text style={styles.quickServiceOptionText}>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+            />
+          </ImageBackground>
+      </View>
+>>>>>>> 395f52500b4f701f1985beed2135d526e9b50573
 
                       navigation.navigate("StorePage", { garage: nearest });
                     }}
