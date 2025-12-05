@@ -1,22 +1,27 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { 
-  ActivityIndicator, 
-  Alert, 
-  KeyboardAvoidingView, 
-  Platform, 
-  ScrollView, 
-  StyleSheet, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  View 
+import { useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function AccountScreen() {
-  const { user, signIn, signUp, logout } = useAuth();
+  const authContext = useAuth();
+  const { user, signIn, signUp, logout } = authContext;
+  
+  console.log('Auth context:', authContext);
+  console.log('signIn function:', typeof signIn, signIn);
+  
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -28,6 +33,9 @@ export default function AccountScreen() {
   const [displayName, setDisplayName] = useState('');
 
   const handleAuth = async () => {
+    console.log('handleAuth called, isLogin:', isLogin);
+    console.log('Email:', email, 'Password length:', password.length);
+    
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -44,24 +52,31 @@ export default function AccountScreen() {
       }
     }
 
+    console.log('Starting auth process...');
     setLoading(true);
     try {
       if (isLogin) {
+        console.log('Calling signIn...');
         await signIn(email, password);
-        Alert.alert('Success', 'Logged in successfully!');
+        console.log('signIn completed');
       } else {
+        console.log('Calling signUp...');
         await signUp(email, password, displayName);
-        Alert.alert('Success', 'Account created successfully!');
+        console.log('signUp completed');
       }
-      // Clear form
+      // Clear form on success
       setEmail('');
       setPassword('');
       setConfirmPassword('');
       setDisplayName('');
+      console.log('Form cleared');
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      console.log('Caught error:', error);
+      const errorMessage = error.message || 'An error occurred';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
+      console.log('Loading set to false');
     }
   };
 

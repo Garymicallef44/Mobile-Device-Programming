@@ -27,6 +27,9 @@ export async function saveUserCarDetails(body: UserCarDetails){
     console.log(`${data.model}, ${data.engineType}, ${data.fuelType}`)
 }
 
+// Dummy export to silence route warning - this is not a route file
+export default function DummyComponent() { return null; }
+
 export async function getUserCarDetails(){
 
     // Get details
