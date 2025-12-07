@@ -39,6 +39,12 @@ export default function TabLayout() {
         )
       }}
       />
+      <Tabs.Screen
+        name="account"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
