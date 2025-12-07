@@ -91,7 +91,7 @@ export default function Navbar() {
                             </View>
 
                             <View style={styles.menuFooter}>
-                                <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Account", "Account page does not currently exist"); }}>
+                                <TouchableOpacity style={styles.menuItem} onPress={() => navigateTo('/(tabs)/account')}>
                                     <Ionicons name="person" size={24} color="#000" style={styles.menuIcon} />
                                     <Text style={styles.menuText}>Account</Text>
                                 </TouchableOpacity>
