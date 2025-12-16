@@ -17,6 +17,7 @@ This guide walks you through setting up Stripe payments in a new Expo applicatio
    * **Google Play Intel x86_64**
 
 ![Android Emulator Setup](https://github.com/user-attachments/assets/7a5e7d4a-c33f-482a-8fa6-54959d0d1ffe)
+
 5. Run the virtual device
 ---
 
