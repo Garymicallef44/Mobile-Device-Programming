@@ -1,14 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+export type FuelType = "Petrol" | "Diesel";
+export type EngineType = "Electric" | "Gas";
 
 export type UserCarDetails = {
-    model : string,
-    vNumber: string,
-    detail: string,
-    engineType: string,
-    // due to engine type
-    fuelType: string | null,
-}   
+  model: string;
+  vNumber: string;
+  detail: string;
+  engineType: EngineType;
+  fuelType: FuelType | null;
+};
 
 
 

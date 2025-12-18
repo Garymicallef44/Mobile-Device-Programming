@@ -1,19 +1,17 @@
-import { useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
-import { ScrollView } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import Navbar from "@/components/navbar";
-import { saveUserCarDetails, UserCarDetails } from "./backend/AsyncStorage";
+import { getUserCarDetails, saveUserCarDetails, UserCarDetails } from "./backend/AsyncStorage";
 
 
 export default function CarDetails() {
 
 
-  const [carModel, setCarModel] = useState<string>();
+const [carModel, setCarModel] = useState<string>("");
+const [vinNo, setVinNo] = useState<string>("");
+const [extraDetail, setExtraDetail] = useState<string>("");
 
-  const [vinNo, setVinNo] = useState<string>();
-
-  const [extraDetail, setExtraDetail] = useState<string>();
 
 
 
@@ -24,7 +22,22 @@ export default function CarDetails() {
   const [fuelType, setFuelType] = useState<"Petrol" | "Diesel" | null>(
     "Petrol"
   );
+  
+  useEffect(() => {
+  (async () => {
+    const data = await getUserCarDetails();
+    if (!data) return;
 
+    setCarModel(data.model);
+    setVinNo(data.vNumber);
+    setExtraDetail(data.detail);
+    setEngineType(data.engineType as any);
+    setFuelType(data.fuelType);
+  })();
+}, []);
+
+
+  
   return (
     <>
 
@@ -55,6 +68,7 @@ export default function CarDetails() {
     <Text style={{ fontWeight: "700", marginBottom: 6 }}>Car Model & Make</Text>
 
     <TextInput
+      value={carModel}
       placeholder="e.g. Toyota Corolla"
       style={{
         backgroundColor: "#f3f3f3",
@@ -120,6 +134,7 @@ export default function CarDetails() {
     <Text style={{ fontWeight: "700", marginBottom: 6 }}>Vin Number</Text>
 
     <TextInput
+      value={vinNo}
       placeholder="e.g. Toyota Corolla"
       style={{
         backgroundColor: "#f3f3f3",
@@ -182,6 +197,7 @@ export default function CarDetails() {
             Extra Specifics
           </Text>
           <TextInput
+            value={extraDetail}
             multiline
             placeholder="Input any extra details that may be important for service garages."
             style={{
@@ -197,15 +213,15 @@ export default function CarDetails() {
 
         {/* Save Button */}
         <Pressable
-          style={{
-            backgroundColor: "#FFB869",
+          style={({ pressed }) => ({
+             backgroundColor: pressed ? "#e6a14f" : "#FFB869",
             paddingVertical: 16,
             alignSelf: "center",
             marginTop: 20,
             borderRadius: 20,
             paddingHorizontal: 40,
-          }}
-          onPress={() => {
+          })}
+          onPress={async () => {
 
             if (!carModel?.trim() || !vinNo?.trim() || !extraDetail?.trim()){
               alert("Please fill in all details.")
@@ -219,7 +235,8 @@ export default function CarDetails() {
               engineType: engineType! 
             }
 
-            saveUserCarDetails(body);
+            await saveUserCarDetails(body);
+            alert("Car has been saved Successfully");
 
           }}
         >
