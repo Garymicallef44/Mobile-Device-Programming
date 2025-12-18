@@ -4,15 +4,20 @@ import { useNavigation } from "expo-router";
 import { useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+
+type Service = {
+  Price: number;
+  RequireGarage: boolean;
+};
+
 type ServicesList = {
-  [id: string] : number
-}
+  [serviceName: string]: Service;
+};
 
 const EuroFormat = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'EUR'
 })
-
 
 
 type Garage = {
@@ -91,13 +96,13 @@ export default function ServicePage() {
             <TouchableOpacity
               key={i}
               style={[styles.serviceItem, isSelected && styles.selectedItem]}
-              onPress={() => toggleSelect(garage.Services[s], i)}
+              onPress={() => toggleSelect(garage.Services[s].Price, i)}
             >
               <Text style={[styles.serviceText, isSelected && styles.selectedText]}>
                 {s}
               </Text>
               <Text style={[styles.priceText, isSelected && styles.selectedText]}>
-                {EuroFormat.format(garage.Services[`${s}`])}
+                {EuroFormat.format(garage.Services[s].Price)}
               </Text>
             </TouchableOpacity>
           );
@@ -108,17 +113,35 @@ export default function ServicePage() {
         <Text style={styles.totalText}>Total</Text>
         <Text style={styles.totalAmount}>{EuroFormat.format(price)}</Text>
       </View>
-      <TouchableOpacity style={styles.orderButton}
-      >
-        <Text style={styles.orderButtonText}        
-        onPress={() =>
+      <TouchableOpacity
+        style={styles.orderButton}
+        onPress={() => {
+          if (selected.length === 0) {
+            alert("Please select at least one service");
+            return;
+          }
+
+          const selectedServices = selected.map(i => {
+            const name = services[i];
+            return {
+              name,
+              ...garage.Services[name],
+            };
+          });
+
           navigation.navigate("orderDetails", {
-            garage: garage,
-            price: EuroFormat.format(price),
-            services: services,
-          })
-        }>Order Service</Text>
+            garage,
+            price,
+            services: selectedServices,
+          });
+        }}
+      >
+        <Text style={styles.orderButtonText}>
+          Order Service
+        </Text>
       </TouchableOpacity>
+
+
     </ScrollView>
   );
 }

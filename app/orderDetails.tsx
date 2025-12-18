@@ -14,6 +14,9 @@ import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
 export default function OrderDetailsPage() {
   const route = useRoute<any>();
   const { garage, price, services } = route.params;
+  const requiresGarageVisit = services.some(
+  (s: any) => s.RequireGarage === true
+);
 
   const stripe = useStripe();
 
@@ -27,9 +30,21 @@ export default function OrderDetailsPage() {
   });
 
   // Ask for location permission on mount
+    useEffect(() => {
+      if (!requiresGarageVisit) {
+        requestLocation();
+      }
+    }, [requiresGarageVisit]);
+
+
   useEffect(() => {
-    requestLocation();
-  }, []);
+    if (requiresGarageVisit && garage?.Coordinates) {
+      updateMapToLocation(
+        garage.Coordinates.latitude,
+        garage.Coordinates.longitude
+      );
+    }
+  }, [requiresGarageVisit]);
 
   const requestLocation = async () => {
   const { status, canAskAgain } = await Location.getForegroundPermissionsAsync();
@@ -109,19 +124,26 @@ export default function OrderDetailsPage() {
         keyboardType="phone-pad"
       />
 
-      {/* Map */}
-      <Text style={[styles.label, { marginTop: 20 }]}>Select Service Location</Text>
+          {/* Map */}
+    <Text style={[styles.label, { marginTop: 20 }]}>
+      {requiresGarageVisit ? "Garage Location" : "Select Service Location"}
+    </Text>
 
       <MapView
         style={styles.map}
         region={region}
-        onPress={onMapPress}
+        onPress={requiresGarageVisit ? undefined : onMapPress}
+        scrollEnabled={!requiresGarageVisit}
+        zoomEnabled={!requiresGarageVisit}
+        rotateEnabled={!requiresGarageVisit}
       >
+
         {gps && (
           <Marker
-            draggable
+            draggable={!requiresGarageVisit}
             coordinate={{ latitude: gps.lat, longitude: gps.lng }}
             onDragEnd={(e) => {
+              if (requiresGarageVisit) return;
               const { latitude, longitude } = e.nativeEvent.coordinate;
               updateMapToLocation(latitude, longitude);
             }}
@@ -129,10 +151,12 @@ export default function OrderDetailsPage() {
         )}
       </MapView>
 
-      {/* ⭐ NEW BUTTON: Use Current Location */}
-      <TouchableOpacity style={styles.gpsButton} onPress={requestLocation}>
-        <Text style={styles.gpsButtonText}>Use Current Location</Text>
-      </TouchableOpacity>
+      {!requiresGarageVisit && (
+        <TouchableOpacity style={styles.gpsButton} onPress={requestLocation}>
+          <Text style={styles.gpsButtonText}>Use Current Location</Text>
+        </TouchableOpacity>
+      )}
+
 
       {gps && (
         <Text style={styles.location}>
@@ -144,7 +168,7 @@ export default function OrderDetailsPage() {
       <View style={styles.totalBox}>
         <Text style={styles.totalText}>Total</Text>
         <Text style={styles.totalAmount}>
-          {price}
+          €{price}
         </Text>
       </View>
 

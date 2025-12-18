@@ -9,20 +9,29 @@ import { db } from "../../firebaseConfig";
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
+  
+type Service = {
+  Price: number;
+  RequireGarage: boolean;
+};
 
-  type Garage = {
-    Coordinates: GeoPoint,
-    Description: string,
-    ElectricService: boolean,
-    Id: number,
-    Latitutde: number,
-    Longitude: number,
-    Location: string,
-    Name: string,
-    Rating: number,
-    Services: string[],
-    Town: string
-  }
+type ServicesList = {
+  [serviceName: string]: Service;
+};
+
+type Garage = {
+  Coordinates: GeoPoint;
+  Description: string;
+  ElectricService: boolean;
+  Id: number;
+  Latitutde: number;
+  Longitude: number;
+  Location: string;
+  Name: string;
+  Rating: number;
+  Services: ServicesList;
+  Town: string;
+};
 
   type Garages = {
     garages: Garage[];
