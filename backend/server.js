@@ -4,8 +4,8 @@ require("dotenv").config({ path: "../.env" });
 const express = require("express");
 const cors = require("cors");
 const Stripe = require("stripe");
-const {doc,getDoc} = require("firebase/firestore")
-const {db} = require("../firebaseConfig.js");
+const firestore = require("firebase/firestore");
+const fbConfig = require("../firebaseConfig");
 
 const app = express();
 app.use(express.json());
@@ -70,15 +70,17 @@ app.post("/create-checkout-session", async(req, res) => {
 
 app.post("/send-notif",async(req,res)=>{
     const {id, title,msg} = req.body;
-    
-    try{
-    const deviceRef = doc(db, "devices",id);
-    const docs = await getDoc(deviceRef);
-    if (!docs.exists){
+    const devices = firestore.collection(fbConfig.db,"devices");
+    const q = firestore.query(devices,firestore.where("id","==",id));
+    const docs = (await firestore.getDocs(q));
+    if (docs.empty){
         return res.status(404).json({success:false, error: "No Device found"});
     }
-    let token = docs.get("token");
-    
+    let token;
+    if (docs.size === 1){
+        token = docs.docs[0].get("token");
+    }
+    try{
     
     const response = await fetch("https://exp.host/--/api/v2/push/send",{
       method:"POST",
