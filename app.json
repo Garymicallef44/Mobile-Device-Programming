@@ -13,6 +13,8 @@
       "bundleIdentifier": "com.anonymous.ServifyApp"
     },
     "android": {
+      "package": "com.uom.servify",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
