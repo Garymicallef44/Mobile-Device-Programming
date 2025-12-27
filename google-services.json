@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "224238467474",
+    "project_id": "servifyapp-9d5dc",
+    "storage_bucket": "servifyapp-9d5dc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224238467474:android:4cd8f2aacdc2d96193694b",
+        "android_client_info": {
+          "package_name": "com.uom.servify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "224238467474-2ipirlhuai79bp00c2bh3vf7i8ch47hi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZ2seQZJH9fxJK2LECGERNbiLm9NAuWnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "224238467474-2ipirlhuai79bp00c2bh3vf7i8ch47hi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
