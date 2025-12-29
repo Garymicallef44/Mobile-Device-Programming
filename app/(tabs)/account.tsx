@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -17,6 +17,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function AccountScreen() {
   const authContext = useAuth();
+  const navigation = useNavigation<any>();
   const { user, signIn, signUp, logout } = authContext;
   
   console.log('Auth context:', authContext);
@@ -63,6 +64,7 @@ export default function AccountScreen() {
         console.log('Calling signUp...');
         await signUp(email, password, displayName);
         console.log('signUp completed');
+        navigation.navigate("garage");
       }
       // Clear form on success
       setEmail('');

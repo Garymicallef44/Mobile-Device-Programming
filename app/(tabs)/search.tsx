@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-
+import Navbar from '../../components/navbar';
 import { db } from "../../firebaseConfig";
 
 export default function SearchPage() {
@@ -69,22 +69,10 @@ export default function SearchPage() {
   }, [queryText, garages]);
 
   return (
-  <View style={{ flex: 1, backgroundColor: "white", padding: 16 }}>
+  <View style={{ flex: 1, backgroundColor: "white", padding: 0 }}>
 
     {/* TITLE ON TOP */}
-    <View style={{ paddingTop: 60, paddingBottom: 10 }}>
-      <Text
-        style={{
-          textAlign: "center",
-          fontSize: 28,
-          fontWeight: "700",
-          color: "black"
-        }}
-      >
-        Servify
-      </Text>
-    </View>
-
+    <Navbar />
     {/* SEARCH BAR */}
     <TextInput
       style={styles.searchInput}
@@ -138,9 +126,11 @@ const styles = StyleSheet.create({
   searchInput: {
     width: "100%",
     backgroundColor: "#f3f3f3",
-    padding: 12,
+    height: 50,
+    padding: 15,
     borderRadius: 12,
-    fontSize: 16
+    marginTop: 150,
+    fontSize: 16,
   },
   card: {
     flexDirection: "row",
@@ -159,4 +149,4 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "800"
   }
-});
+}); 

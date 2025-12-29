@@ -6,6 +6,7 @@ import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig";
+import { getLoginSession } from '../backend/AsyncStorage';
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
@@ -165,6 +166,17 @@ type Garage = {
     retrieveUserLocation();
   }, [])
 
+  // Check if user is logged in
+  useEffect( () => {
+    const checkLogin = async () => {
+      const loggedIn : boolean = await getLoginSession();
+      if (!loggedIn){
+        navigation.navigate("account");
+      }
+    }
+
+    checkLogin();
+  }, [])
   return (
         <ScrollView style={{backgroundColor: 'white'}}>
           <Navbar />

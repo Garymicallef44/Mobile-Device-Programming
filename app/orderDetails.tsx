@@ -3,6 +3,7 @@ import { useStripe } from "@stripe/stripe-react-native";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -111,7 +112,7 @@ export default function OrderDetailsPage() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>Order Details</Text>
 
       {/* Phone number input */}
@@ -124,10 +125,16 @@ export default function OrderDetailsPage() {
         keyboardType="phone-pad"
       />
 
-          {/* Map */}
+    {/* Map */}
     <Text style={[styles.label, { marginTop: 20 }]}>
       {requiresGarageVisit ? "Garage Location" : "Select Service Location"}
     </Text>
+
+    <Text style={[styles.label, { marginTop: 40 }]}>
+      {requiresGarageVisit ? "Your selected service/s require a visit to the garage." : "Please select the location where you want the service to be performed on the map below."}
+    </Text>
+
+    
 
       <MapView
         style={styles.map}
@@ -165,17 +172,31 @@ export default function OrderDetailsPage() {
       )}
 
       {/* Total */}
-      <View style={styles.totalBox}>
-        <Text style={styles.totalText}>Total</Text>
-        <Text style={styles.totalAmount}>
-          €{price}
+      <View style={styles.servicesList}>
+        <Text style={[styles.label, { marginBottom: 10 }]}>Selected Services</Text>
+        {services.map((s: any, i: number) => (
+          <View key={i}> 
+            <Text style={styles.serviceItem}> 
+              {s.name}: €{s.Price.toFixed(2)} 
+            </Text>
+
+          </View>
+
+        ))}
+
+        <View style={styles.totalBox}>
+          <Text style={styles.totalText}>Total</Text>
+          <Text style={styles.totalAmount}>
+            €{price.toFixed(2)}
         </Text>
       </View>
+      </View>
+
 
       <TouchableOpacity style={styles.payButton} onPress={payNow}>
         <Text style={styles.payButtonText}>Pay Now</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -228,4 +249,23 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   payButtonText: { color: "#fff", fontSize: 18, fontWeight: "700" },
+  servicesList: {
+    display: "flex",
+    flexDirection: "column",
+    marginTop: 10,
+    height: 'auto',
+    backgroundColor: '#fafafa',
+    padding: 10,
+    borderRadius: 8,
+    gap: 5
+  },
+  serviceItem: {
+    fontSize: 16,
+    width: '100%',
+    height: 'auto',
+    backgroundColor: '#ff4800ff',
+    color: 'white',
+    padding: 10,
+    borderRadius: 8,
+  }
 });
