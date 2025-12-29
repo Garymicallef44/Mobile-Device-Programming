@@ -1,3 +1,4 @@
+import { HistoryInstance, saveItem } from "@/services/storage";
 import { useRoute } from "@react-navigation/native";
 import { useStripe } from "@stripe/stripe-react-native";
 import * as Location from "expo-location";
@@ -29,7 +30,7 @@ export default function OrderDetailsPage() {
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
-
+  const [history, setHistory]= useState<HistoryInstance[]>([]);
   // Ask for location permission on mount
     useEffect(() => {
       if (!requiresGarageVisit) {
@@ -89,7 +90,7 @@ export default function OrderDetailsPage() {
     if (!phone) return alert("Please enter phone number");
     if (!gps) return alert("Please select a location on the map");
 
-    const response = await fetch("http://10.0.2.2:3000/create-payment-intent", {
+    const response = await fetch("http://localhost:3000/create-payment-intent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ price }),
@@ -107,8 +108,14 @@ export default function OrderDetailsPage() {
 
     const payment = await stripe.presentPaymentSheet();
 
-    if (payment.error) alert("Payment failed");
-    else alert("Payment complete!");
+    if (payment.error) {
+      alert("Payment failed");
+    }
+    else {
+      alert("Payment complete!");
+      saveItem({name:garage?.Name,garageId:garage?.Id,date:new Date(), location:{city:garage?.Town ? garage?.Town:'Unknown', country:garage?.Location? garage?.Location:'Unknown'},price:price});
+    }
+
   };
 
   return (
