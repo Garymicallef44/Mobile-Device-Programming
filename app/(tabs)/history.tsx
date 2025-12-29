@@ -1,21 +1,18 @@
 
+import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-
-import * as MMKV from "react-native-mmkv";
 import HistoryCard from "../../components/ui/historyCard";
-let storage = MMKV.createMMKV();
+import { getItems, HistoryInstance } from "../../services/storage";
 export default function HistoryPage(){
-    type HistoryInstance = {
-        id:number,
-        name:string,
-        garageId:number,
-        date:Date,
-        location:{city:string, country:string}
-    }
+    const [history, setHistory] = useState<HistoryInstance[]>([]);
+    
     //TODO: Load from firebase
-    let jsonStr = storage.getString('history');
-    let jsonHistory = jsonStr? JSON.parse(jsonStr) : {};
-    let instances : HistoryInstance[] = jsonHistory.instances;
+    
+    useEffect(()=>{
+    getItems().then(data =>{
+      if (data) setHistory(data);
+    });
+    },[]);
     // let instances:HistoryInstance[] = [{id:5,name:"Tire Replacement",garageId:2,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Oil Change",garageId:3,date:new Date(),location:{city:"Sta. Venera",country:"Malta"}},{id:5,name:"Makeover",garageId:5,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Tire Replacement",garageId:2,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Oil Change",garageId:3,date:new Date(),location:{city:"Sta. Venera",country:"Malta"}},{id:5,name:"Makeover",garageId:5,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Tire Replacement",garageId:2,date:new Date(),location:{city:"Siggiewi",country:"Malta"}},{id:5,name:"Oil Change",garageId:3,date:new Date(),location:{city:"Sta. Venera",country:"Malta"}},{id:5,name:"Makeover",garageId:5,date:new Date(),location:{city:"Siggiewi",country:"Malta"}}]; 
     //load from firebase
     // we want to create a list of history cards
@@ -33,7 +30,7 @@ export default function HistoryPage(){
       
       
             
-      {instances.map((item)=>(
+      {history.map((item)=>(
         <HistoryCard
         key={item.id}
         id={item.id}

@@ -6,6 +6,7 @@ import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig";
+
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
