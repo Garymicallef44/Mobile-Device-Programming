@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
-import Navbar from "@/components/navbar";
 import { getUserCarDetails, saveUserCarDetails, UserCarDetails } from "./backend/AsyncStorage";
 
 
@@ -11,10 +10,6 @@ export default function CarDetails() {
 const [carModel, setCarModel] = useState<string>("");
 const [vinNo, setVinNo] = useState<string>("");
 const [extraDetail, setExtraDetail] = useState<string>("");
-
-
-
-
 
   const [engineType, setEngineType] = useState<"Electric" | "Gas" | null>(
     "Gas"
@@ -43,10 +38,9 @@ const [extraDetail, setExtraDetail] = useState<string>("");
 
         <ScrollView
     style={{ flex: 1, backgroundColor: "#fff" }}
-    contentContainerStyle={{ paddingBottom: 60 }}
-  >
+    contentContainerStyle={{ paddingBottom: 60 }}>
 
-      <Navbar />
+      {/* <Navbar /> */}
         {/* Top Bar */}
 
       <View style={{padding: 20}}>

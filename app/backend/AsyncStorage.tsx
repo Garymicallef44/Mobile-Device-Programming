@@ -12,8 +12,6 @@ export type UserCarDetails = {
 };
 
 
-
-
 export async function saveUserCarDetails(body: UserCarDetails){
     // Save details on async storage
 
@@ -26,6 +24,15 @@ export async function saveUserCarDetails(body: UserCarDetails){
     const data = details ? JSON.parse(details) : null;
 
     console.log(`${data.model}, ${data.engineType}, ${data.fuelType}`)
+}
+
+export async function setLoginSession() {
+    await AsyncStorage.setItem("hasLoggedIn", JSON.stringify(true));
+}
+
+export async function getLoginSession() {
+    const session = await AsyncStorage.getItem("hasLoggedIn");
+    return session ? true : false;
 }
 
 // Dummy export to silence route warning - this is not a route file
