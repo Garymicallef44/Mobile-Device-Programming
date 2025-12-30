@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 export type HistoryInstance = {
+        
         name:string,
-        garageId:number,
+        garageName:string,
         date:Date,
         location:{city:string, country:string},
         price: number

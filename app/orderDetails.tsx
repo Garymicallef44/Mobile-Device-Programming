@@ -113,7 +113,7 @@ export default function OrderDetailsPage() {
     }
     else {
       alert("Payment complete!");
-      saveItem({name:garage?.Name,garageId:garage?.Id,date:new Date(), location:{city:garage?.Town ? garage?.Town:'Unknown', country:garage?.Location? garage?.Location:'Unknown'},price:price});
+      saveItem({id:0,name:garage?.Name,garageId:garage?.Id,date:new Date(), location:{city:garage?.Town ? garage?.Town:'Unknown', country:garage?.Location? garage?.Location:'Unknown'},price:price});
     }
 
   };

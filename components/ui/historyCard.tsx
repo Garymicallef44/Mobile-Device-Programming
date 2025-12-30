@@ -1,17 +1,13 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
-let testDB = new Map<number,string>();
-testDB.set(2,"Tux's Services");
-testDB.set(3,"Gill Bates");
-testDB.set(5,"JeBron Lames");
+
 type HistoryCardProps={
-    id:number,
     hisName:string,
-    garageId:number,
+    garageName:string,
     date:Date,
     location:{city:string,country:string}
 }
-export default function HistoryCard({id,hisName,garageId,date,location}:HistoryCardProps){
+export default function HistoryCard({hisName,garageName,date,location}:HistoryCardProps){
     return(<View style={styles.item}>
         <View style={styles.row}>
             <Text style={styles.itemText}>
@@ -20,11 +16,11 @@ export default function HistoryCard({id,hisName,garageId,date,location}:HistoryC
         </View>
         <View style={styles.row}>
             <MaterialIcons name="schedule" size={20} style={{paddingRight:4}}/>
-            <Text style={styles.locationText}>{date.toLocaleDateString("en-UK")} </Text>
+            <Text style={styles.locationText}>{date instanceof Date? date.getTime():"Null"} </Text>
         </View>
         <View style={styles.row}>
             <MaterialIcons name="build" size={17} style={{marginLeft:3}}></MaterialIcons>
-            <Text style={styles.garageText}>{testDB.get(garageId)}</Text>
+            <Text style={styles.garageText}>{garageName}</Text>
         </View>
         <View style={styles.row}>
         <MaterialIcons name="location-on" size={20}/>

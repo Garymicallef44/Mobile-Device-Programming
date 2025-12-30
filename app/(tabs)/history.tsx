@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import HistoryCard from "../../components/ui/historyCard";
 import { getItems, HistoryInstance } from "../../services/storage";
+let counter = 0;
 export default function HistoryPage(){
+
     const [history, setHistory] = useState<HistoryInstance[]>([]);
-    
+    // saveItem({name:"hello",garageName:"Hi",date:new Date(),location:{city:"Null",country:"Null"},price:0});  
     //TODO: Load from firebase
     
     useEffect(()=>{
@@ -32,13 +34,14 @@ export default function HistoryPage(){
             
       {history.map((item)=>(
         <HistoryCard
-        key={item.id}
-        id={item.id}
-        garageId={item.garageId}
+        key={counter}
+        
+        garageName={item.garageName}
         hisName={item.name}
         date={item.date}
         location={item.location}
         />
+
       ))}
     </View>
     </ScrollView>
