@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
+import { getUserCarDetails } from "./backend/AsyncStorage";
 
 export default function OrderDetailsPage() {
   const route = useRoute<any>();
@@ -86,6 +87,8 @@ export default function OrderDetailsPage() {
 
   // PAYMENT
   const payNow = async () => {
+
+    if(!getUserCarDetails()) return alert("Yo man get a car bitchass");
     if (!phone) return alert("Please enter phone number");
     if (!gps) return alert("Please select a location on the map");
 
