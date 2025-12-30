@@ -159,6 +159,7 @@ export default function AccountScreen() {
                   value={displayName}
                   onChangeText={setDisplayName}
                   autoCapitalize="words"
+                  placeholderTextColor={"black"}
                 />
               </View>
             )}
@@ -172,6 +173,7 @@ export default function AccountScreen() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                placeholderTextColor={"black"}
               />
             </View>
 
@@ -183,6 +185,7 @@ export default function AccountScreen() {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
+                placeholderTextColor={"black"}
               />
             </View>
 
@@ -195,6 +198,7 @@ export default function AccountScreen() {
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry
+                  placeholderTextColor={"black"}
                 />
               </View>
             )}
@@ -285,7 +289,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#000',
+    color: 'black',
   },
   submitButton: {
     backgroundColor: '#FFBD71',
