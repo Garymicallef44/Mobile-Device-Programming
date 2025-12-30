@@ -1,5 +1,6 @@
 // Import the functions you need from the SDKs you need
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import 'dotenv/config';
 import { initializeApp } from "firebase/app";
 import { getAuth, getReactNativePersistence, initializeAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
@@ -10,13 +11,13 @@ import { getFirestore } from "firebase/firestore";
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB-OYwubrmTaZThyaapsaBkME13fNRKD-c",
-  authDomain: "servifyapp-9d5dc.firebaseapp.com",
-  projectId: "servifyapp-9d5dc",
-  storageBucket: "servifyapp-9d5dc.firebasestorage.app",
-  messagingSenderId: "224238467474",
-  appId: "1:224238467474:web:bc3d7ea71b313aaf93694b",
-  measurementId: "G-SDL72MZVDP"
+  apiKey: process.env.EXPO_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
