@@ -115,96 +115,103 @@ export default function OrderDetailsPage() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Order Details</Text>
+    <>
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Order Details</Text>
 
-      {/* Phone number input */}
-      <Text style={styles.label}>Phone Number</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter phone number"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-      />
+        {/* Phone number input */}
+        <Text style={styles.label}>Phone Number</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter phone number"
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
+        />
 
-    {/* Map */}
-    <Text style={[styles.label, { marginTop: 20 }]}>
-      {requiresGarageVisit ? "Garage Location" : "Select Service Location"}
-    </Text>
+      {/* Map */}
+      <Text style={[styles.label, { marginTop: 20 }]}>
+        {requiresGarageVisit ? "Garage Location" : "Select Service Location"}
+      </Text>
 
-    <Text style={[styles.label, { marginTop: 40 }]}>
-      {requiresGarageVisit ? "Your selected service/s require a visit to the garage." : "Please select the location where you want the service to be performed on the map below."}
-    </Text>
+      <Text style={[styles.label, { marginTop: 40 }]}>
+        {requiresGarageVisit ? "Your selected service/s require a visit to the garage." : "Please select the location where you want the service to be performed on the map below."}
+      </Text>
 
-    
+      
 
-      <MapView
-        style={styles.map}
-        region={region}
-        onPress={requiresGarageVisit ? undefined : onMapPress}
-        scrollEnabled={!requiresGarageVisit}
-        zoomEnabled={!requiresGarageVisit}
-        rotateEnabled={!requiresGarageVisit}
-      >
+        <MapView
+          style={styles.map}
+          region={region}
+          onPress={requiresGarageVisit ? undefined : onMapPress}
+          scrollEnabled={!requiresGarageVisit}
+          zoomEnabled={!requiresGarageVisit}
+          rotateEnabled={!requiresGarageVisit}
+        >
+
+          {gps && (
+            <Marker
+              draggable={!requiresGarageVisit}
+              coordinate={{ latitude: gps.lat, longitude: gps.lng }}
+              onDragEnd={(e) => {
+                if (requiresGarageVisit) return;
+                const { latitude, longitude } = e.nativeEvent.coordinate;
+                updateMapToLocation(latitude, longitude);
+              }}
+            />
+          )}
+        </MapView>
+
+        {!requiresGarageVisit && (
+          <TouchableOpacity style={styles.gpsButton} onPress={requestLocation}>
+            <Text style={styles.gpsButtonText}>Use Current Location</Text>
+          </TouchableOpacity>
+        )}
+
 
         {gps && (
-          <Marker
-            draggable={!requiresGarageVisit}
-            coordinate={{ latitude: gps.lat, longitude: gps.lng }}
-            onDragEnd={(e) => {
-              if (requiresGarageVisit) return;
-              const { latitude, longitude } = e.nativeEvent.coordinate;
-              updateMapToLocation(latitude, longitude);
-            }}
-          />
+          <Text style={styles.location}>
+            Selected: {gps.lat.toFixed(5)}, {gps.lng.toFixed(5)}
+          </Text>
         )}
-      </MapView>
 
-      {!requiresGarageVisit && (
-        <TouchableOpacity style={styles.gpsButton} onPress={requestLocation}>
-          <Text style={styles.gpsButtonText}>Use Current Location</Text>
+        {/* Total */}
+        <View style={styles.servicesList}>
+          <Text style={[styles.label, { marginBottom: 10 }]}>Selected Services</Text>
+          {services.map((s: any, i: number) => (
+            <View key={i}> 
+              <Text style={styles.serviceItem}> 
+                {s.name}: €{s.Price.toFixed(2)} 
+              </Text>
+
+            </View>
+
+          ))}
+
+          <View style={styles.totalBox}>
+            <Text style={styles.totalText}>Total</Text>
+            <Text style={styles.totalAmount}>
+              €{price.toFixed(2)}
+          </Text>
+        </View>
+        </View>
+
+
+
+
+      </ScrollView>
+
+      <View style={styles.paybtncontainer}>
+        <TouchableOpacity style={styles.payButton} onPress={payNow}>
+            <Text style={styles.payButtonText}>Pay Now €{price.toFixed(2)}</Text>
         </TouchableOpacity>
-      )}
-
-
-      {gps && (
-        <Text style={styles.location}>
-          Selected: {gps.lat.toFixed(5)}, {gps.lng.toFixed(5)}
-        </Text>
-      )}
-
-      {/* Total */}
-      <View style={styles.servicesList}>
-        <Text style={[styles.label, { marginBottom: 10 }]}>Selected Services</Text>
-        {services.map((s: any, i: number) => (
-          <View key={i}> 
-            <Text style={styles.serviceItem}> 
-              {s.name}: €{s.Price.toFixed(2)} 
-            </Text>
-
-          </View>
-
-        ))}
-
-        <View style={styles.totalBox}>
-          <Text style={styles.totalText}>Total</Text>
-          <Text style={styles.totalAmount}>
-            €{price.toFixed(2)}
-        </Text>
       </View>
-      </View>
-
-
-      <TouchableOpacity style={styles.payButton} onPress={payNow}>
-        <Text style={styles.payButtonText}>Pay Now</Text>
-      </TouchableOpacity>
-    </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  container: { flex: 1, padding: 20, backgroundColor: "white"},
   title: { fontSize: 30, fontWeight: "700", marginBottom: 20 },
   label: { fontSize: 16, fontWeight: "600", marginTop: 15 },
   input: {
@@ -270,5 +277,10 @@ const styles = StyleSheet.create({
     color: 'white',
     padding: 10,
     borderRadius: 8,
+  },
+  paybtncontainer: {
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   }
 });
