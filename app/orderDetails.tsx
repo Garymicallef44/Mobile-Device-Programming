@@ -92,7 +92,7 @@ export default function OrderDetailsPage() {
     const response = await fetch("http://10.0.2.2:3000/create-payment-intent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: price}),
+      body: JSON.stringify({ price }),
     });
 
     const json = await response.json();
