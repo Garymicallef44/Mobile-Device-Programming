@@ -16,7 +16,14 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.post("/create-payment-intent", async(req, res) => {
     try {
-        const { amount } = req.body;
+        const { price } = req.body;
+        const priceNumber = Number(price);
+
+        if (!Number.isFinite(priceNumber)) {
+            return res.status(400).json({ error: "Invalid price" });
+        }
+
+        const amount = Math.round(priceNumber * 100); // cents
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount,
