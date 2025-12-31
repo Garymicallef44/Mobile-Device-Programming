@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
+import { saveItem } from "../services/storage";
 
 export default function OrderDetailsPage() {
   const route = useRoute<any>();
@@ -86,6 +87,7 @@ export default function OrderDetailsPage() {
 
   // PAYMENT
   const payNow = async () => {
+    
     if (!phone) return alert("Please enter phone number");
     if (!gps) return alert("Please select a location on the map");
 
@@ -107,8 +109,23 @@ export default function OrderDetailsPage() {
 
     const payment = await stripe.presentPaymentSheet();
 
-    if (payment.error) alert("Payment failed");
-    else alert("Payment complete!");
+    if (payment.error){ alert("Payment failed");}
+    else {
+      alert("Payment complete!");
+      let serviceStr = '';
+    if (services.length > 1){
+      let serviceNames = services.map((s:any)=>
+          s.name
+      );
+      let last = serviceNames.pop();
+      serviceStr =  serviceNames.join(', ') + " and " +  last;
+    }else{
+      serviceStr = services[0].name;
+    }
+    console.log(serviceStr);
+    saveItem({name:serviceStr,garageName:garage?.Name,date:new Date(),location:{city:garage?.Town,country:garage?.country
+      },price:price.toFixed(2)});
+    }
   };
 
   return (
@@ -247,6 +264,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: "center",
     marginTop: 30,
+    marginBottom: 30
   },
   payButtonText: { color: "#fff", fontSize: 18, fontWeight: "700" },
   servicesList: {
