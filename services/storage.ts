@@ -3,7 +3,7 @@ export type HistoryInstance = {
         name:string,
         garageName:string,
         date:Date,
-        location:{city:string, country:string},
+        location:{city:string, location:string},
         price: number
     }
 export const saveItem = async(item: HistoryInstance)=>{

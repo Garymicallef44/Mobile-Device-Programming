@@ -5,7 +5,7 @@ type HistoryCardProps={
     hisName:string,
     garageName:string,
     date:Date,
-    location:{city:string,country:string}
+    location:{city:string,location:string}
     price:number
 }
 export default function HistoryCard({hisName,garageName,date,location,price}:HistoryCardProps){
@@ -25,7 +25,7 @@ export default function HistoryCard({hisName,garageName,date,location,price}:His
         </View>
         <View style={styles.row}>
         <MaterialIcons name="location-on" size={20}/>
-        <Text style={styles.locationText}>{location.city}, {location.country}</Text></View>
+        <Text style={styles.locationText}>{location.location}, {location.city}</Text></View>
         <View style={styles.row}>
             <MaterialIcons name="monetization-on"/>
             <Text style={styles.locationText}> €{price}</Text></View>

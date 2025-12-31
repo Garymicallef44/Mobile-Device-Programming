@@ -18,7 +18,7 @@ export default function OrderDetailsPage() {
   const { garage, price, services } = route.params;
   const requiresGarageVisit = services.some(
   (s: any) => s.RequireGarage === true
-);
+ );
 
   const stripe = useStripe();
 
@@ -123,7 +123,16 @@ export default function OrderDetailsPage() {
       serviceStr = services[0].name;
     }
     console.log(serviceStr);
-    saveItem({name:serviceStr,garageName:garage?.Name,date:new Date(),location:{city:garage?.Town,country:garage?.country
+    let city= '';
+    let location= '';
+    if(requiresGarageVisit){
+      city=garage?.city;
+      location=garage?.location;
+    }else{
+      city = gps.lat.toString();
+      location = gps.lng.toString();
+    }
+    saveItem({name:serviceStr,garageName:garage?.Name,date:new Date(),location:{city:city,location:location
       },price:price.toFixed(2)});
     }
   };
