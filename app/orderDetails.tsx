@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
 import { saveItem } from "../services/storage";
+import { getUserCarDetails } from "./backend/AsyncStorage";
 
 export default function OrderDetailsPage() {
   const route = useRoute<any>();
