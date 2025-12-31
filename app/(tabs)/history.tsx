@@ -43,7 +43,7 @@ export default function HistoryPage(){
         garageName={item.garageName}
         hisName={item.name}
         date={new Date(item.date)}
-        location={item.location}
+        
         price={item.price}
         />
         

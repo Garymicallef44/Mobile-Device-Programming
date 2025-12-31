@@ -5,10 +5,10 @@ type HistoryCardProps={
     hisName:string,
     garageName:string,
     date:Date,
-    location:{city:string,location:string}
+    
     price:number
 }
-export default function HistoryCard({hisName,garageName,date,location,price}:HistoryCardProps){
+export default function HistoryCard({hisName,garageName,date,price}:HistoryCardProps){
     return(<View style={styles.item}>
         <View style={styles.row}>
             <Text style={styles.itemText}>
@@ -17,18 +17,16 @@ export default function HistoryCard({hisName,garageName,date,location,price}:His
         </View>
         <View style={styles.row}>
             <MaterialIcons name="schedule" size={20} style={{paddingRight:4}}/>
-            <Text style={styles.locationText}>{date.toLocaleDateString("en-UK")} </Text>
+            <Text style={styles.dateText}>{date.toLocaleDateString("en-UK")} </Text>
         </View>
         <View style={styles.row}>
             <MaterialIcons name="build" size={17} style={{marginLeft:3}}></MaterialIcons>
             <Text style={styles.garageText}>{garageName}</Text>
         </View>
-        <View style={styles.row}>
-        <MaterialIcons name="location-on" size={20}/>
-        <Text style={styles.locationText}>{location.location}, {location.city}</Text></View>
+       
         <View style={styles.row}>
             <MaterialIcons name="monetization-on"/>
-            <Text style={styles.locationText}> €{price}</Text></View>
+            <Text style={styles.priceText}> €{price}</Text></View>
     </View>);
 }
 const styles = StyleSheet.create({
@@ -45,7 +43,10 @@ const styles = StyleSheet.create({
         
         fontSize:20
     },
-    locationText:{
+    priceText:{
+        fontSize:16
+    },
+    dateText:{
         fontSize:16
     },
     row:{
