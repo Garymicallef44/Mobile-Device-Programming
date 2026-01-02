@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config({ path: "./.env" });
 
 
 const express = require("express");
@@ -77,9 +77,9 @@ app.post("/send-notif",async(req,res)=>{
         return res.status(404).json({success:false, error: "No Device found"});
     }
     let token;
-    if (docs.size === 1){
-        token = docs.docs[0].get("token");
-    }
+    
+    token = docs.docs[0].get("token");
+    
     try{
     
     const response = await fetch("https://exp.host/--/api/v2/push/send",{
