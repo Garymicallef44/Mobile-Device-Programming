@@ -10,8 +10,11 @@ import { db } from "../../firebaseConfig.js";
 import { getName, saveName } from '../../services/storage';
 import { getLoginSession } from '../backend/AsyncStorage';
 export default  function HomeScreen() {
-  registerForPushNotifsAndSaveName();
-  Welcome();
+ 
+      registerForPushNotifsAndSaveName();
+      
+    
+  
       
     
     
@@ -119,7 +122,7 @@ export default  function HomeScreen() {
         nearest = g;
       }
     }
-
+    
     return nearest;
   };
 
@@ -282,18 +285,9 @@ export default  function HomeScreen() {
 
   );
 }
-async function Welcome(){
-  const response = await fetch("http://localhost:3000/send-notif",{
-        method:"POST",
-        headers:{"Content-Type": "application/json"},
-        body: JSON.stringify({
-          id:await getName(),
-          title:"Hello",
-          msg:"Welcome To Servify",
-          
-        }),
-      });
-}
+
+
+  
 async function registerForPushNotifsAndSaveName(){
   const {status: existingStatus} = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
@@ -317,7 +311,8 @@ async function registerForPushNotifsAndSaveName(){
   let docs = await getDocs(q);
   
   saveName({name: docs.docs[0].id});
-  return (await getName());
+  // console.log((await getName())[0].name);
+  return (await getName())[0].name;
 }
 
 const styles = StyleSheet.create({

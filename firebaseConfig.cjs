@@ -2,7 +2,9 @@
 require("dotenv").config({path:"../.env"});
 // Import the functions you need from the SDKs you need
 const { initializeApp } = require("firebase/app");
+const {initializeAuth,getReactNativePersistence,getAuth} = require("firebase/auth");
 const { getFirestore } = require("firebase/firestore");
+const { AsyncStorage } = require("@react-native-async-storage/async-storage");
 
 // TODO: Add SDKs for Firebase products that you want to     use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -28,15 +30,15 @@ const db = getFirestore(app);
 module.exports = {app,db};
 
 // Initialize Auth with AsyncStorage persistence
-// const getAuthInstance = () => {
-//   try {
-//     return initializeAuth(app, {
-//       persistence: getReactNativePersistence(AsyncStorage)
-//     });
-//   } catch (error) {
-//     // Auth already initialized, get existing instance
-//     return getAuth(app);
-//   }
-// };
+const getAuthInstance = () => {
+  try {
+    return initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage)
+    });
+  } catch (error) {
+    // Auth already initialized, get existing instance
+    return getAuth(app);
+  }
+};
 
-// export const auth = getAuthInstance();
+export const auth = getAuthInstance();

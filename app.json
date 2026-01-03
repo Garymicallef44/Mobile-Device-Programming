@@ -13,6 +13,7 @@
       "bundleIdentifier": "com.anonymous.ServifyApp"
     },
     "android": {
+      "package": "com.uom.servify",
       "config":{
         "googleMaps": {
           "apiKey": "AIzaSyDZ2seQZJH9fxJK2LECGERNbiLm9NAuWnA"

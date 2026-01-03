@@ -78,7 +78,7 @@ app.post("/create-checkout-session", async(req, res) => {
 app.post("/send-notif",async(req,res)=>{
     try{
         const {id, title,msg} = req.body;
-        
+        console.log("Connected");
         
 
 
@@ -87,7 +87,7 @@ app.post("/send-notif",async(req,res)=>{
     const q = firestore.query(devices,firestore.where(firestore.documentId(),"==",id));
     const docs = await firestore.getDocs(q);
     
-    console.log(docs.docs[0].get("token"));
+    // console.log(docs.docs[0].get("token"));
     if (docs.empty){
         return res.status(404).json({success:false, error: "No Device found"});
     }
