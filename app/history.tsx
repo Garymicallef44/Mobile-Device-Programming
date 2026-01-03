@@ -3,8 +3,8 @@ import Navbar from "@/components/navbar";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-import HistoryCard from "../../components/ui/historyCard";
-import { getItems, HistoryInstance } from "../../services/storage";
+import HistoryCard from "../components/ui/historyCard";
+import { getItems, HistoryInstance } from "../services/storage";
 export default function HistoryPage(){
     
     
