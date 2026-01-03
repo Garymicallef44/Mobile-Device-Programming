@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -13,9 +13,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from './contexts/AuthContext';
 
-export default function AccountScreen() {
+export default function AccountScreenLogin() {
   const authContext = useAuth();
   const navigation = useNavigation<any>();
   const { user, signIn, signUp, logout } = authContext;
@@ -33,6 +33,12 @@ export default function AccountScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
 
+
+  useEffect(() => {
+      navigation.setOptions({
+        headerBackVisible: false,
+      });
+  },[]);
   const handleAuth = async () => {
     console.log('handleAuth called, isLogin:', isLogin);
     console.log('Email:', email, 'Password length:', password.length);
@@ -53,7 +59,7 @@ export default function AccountScreen() {
       }
     }
 
-    console.log('Starting auth process...');
+    // console.log('Starting auth process...');
     setLoading(true);
     try {
       if (isLogin) {
@@ -85,7 +91,6 @@ export default function AccountScreen() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigation.navigate("Login")
     } catch (error: any) {
       Alert.alert('Error', error.message);
     }
@@ -100,6 +105,7 @@ export default function AccountScreen() {
             <Ionicons name="person-circle" size={100} color="#FFBD71" />
           </View>
           
+          <Text style={styles.welcomeText}>Welcome back!</Text>
           <Text style={styles.displayName}>{user.displayName || 'User'}</Text>
           <Text style={styles.email}>{user.email}</Text>
 
@@ -124,7 +130,7 @@ export default function AccountScreen() {
             <Text style={styles.logoutButtonText}>Logout</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.replace({ pathname: '/' }) }>
             <Text style={styles.backButtonText}>Back to Home</Text>
           </TouchableOpacity>
         </View>
@@ -226,6 +232,7 @@ export default function AccountScreen() {
                   : "Already have an account? Login"}
               </Text>
             </TouchableOpacity>
+
 
           </View>
         </View>

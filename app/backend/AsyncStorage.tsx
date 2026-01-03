@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import saveNewCar from "./FirestoreMedium";
 export type FuelType = "Petrol" | "Diesel";
 export type EngineType = "Electric" | "Gas";
 
@@ -11,11 +11,15 @@ export type UserCarDetails = {
   fuelType: FuelType | null;
 };
 
+export async function saveUserId(){
+    
+}
 
 export async function saveUserCarDetails(body: UserCarDetails){
     // Save details on async storage
-
     console.log("saving details")
+
+    await saveNewCar()
     await AsyncStorage.setItem("details", JSON.stringify(body));
 
     // Get details

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
+import { useNavigation } from "expo-router";
 import { getUserCarDetails, saveUserCarDetails, UserCarDetails } from "./backend/AsyncStorage";
 
 
 export default function CarDetails() {
 
-
+const navigation = useNavigation<any>();
 const [carModel, setCarModel] = useState<string>("");
 const [vinNo, setVinNo] = useState<string>("");
 const [extraDetail, setExtraDetail] = useState<string>("");
@@ -36,7 +37,7 @@ const [extraDetail, setExtraDetail] = useState<string>("");
   return (
     <>
 
-        <ScrollView
+    <ScrollView
     style={{ flex: 1, backgroundColor: "#fff" }}
     contentContainerStyle={{ paddingBottom: 60 }}>
 
@@ -231,6 +232,7 @@ const [extraDetail, setExtraDetail] = useState<string>("");
 
             await saveUserCarDetails(body);
             alert("Car has been saved Successfully");
+            navigation.navigate("index");
 
           }}
         >
