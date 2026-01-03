@@ -85,7 +85,7 @@ export default function AccountScreen() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigation.navigate("Login")
+      Alert.alert('Success', 'Logged out successfully');
     } catch (error: any) {
       Alert.alert('Error', error.message);
     }
