@@ -1,5 +1,5 @@
 
-const sendNotif = async (id:string,title:string,message:string)=>{
+export const sendNotif = async (id:string,title:string,message:string)=>{
   try{
     const response = await fetch("http://localhost:3000/send-notif",{
       method:"POST",
@@ -18,4 +18,4 @@ const sendNotif = async (id:string,title:string,message:string)=>{
   }
 };
 
-sendNotif('YOUR ID HERE','Hello','This is a Test Notification');
+
