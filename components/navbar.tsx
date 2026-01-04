@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Alert, Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
- 
+
 
 export default function Navbar() {
     const [menuVisible, setMenuVisible] = useState(false);
@@ -79,11 +79,11 @@ export default function Navbar() {
                                 </TouchableOpacity>
 
 
-                                <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Service History", "Service History page does not currently exist"); }}>
+                                <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/history")}>
                                     <Ionicons name="time" size={24} color="#000" style={styles.menuIcon} />
                                     <Text style={styles.menuText}>Service History</Text>
                                 </TouchableOpacity>
-
+                                
                                 <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Settings", "Settings page does not currently exist"); }}>
                                     <Ionicons name="settings" size={24} color="#000" style={styles.menuIcon} />
                                     <Text style={styles.menuText}>Settings</Text>
