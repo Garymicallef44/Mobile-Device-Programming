@@ -190,6 +190,8 @@ export default function HomeScreen() {
     checkLogin();
   }, [])
   return (
+    <View>
+        <Navbar />
 <FlatList
   style={{ backgroundColor: 'white' }}
   data={garages}
@@ -197,58 +199,43 @@ export default function HomeScreen() {
   contentContainerStyle={{ paddingBottom: 40 }}
   ListHeaderComponent={
     <>
-      <Navbar />
+    
       <View style={{ paddingTop: 90 }} />
 
       <ImageBackground
         source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')}
-        imageStyle={{ ...StyleSheet.absoluteFillObject, resizeMode: 'cover' }}
-        resizeMode="stretch"
+        resizeMode="cover"
         style={styles.quickServicesContainer}
       >
         <Text style={styles.smallTitle}>Quick Service</Text>
 
         <FlatList
           data={quickServices}
-          numColumns={4}
+          numColumns={3}
           scrollEnabled={false}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-          }}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.quickServiceOption}
               onPress={() => {
                 const nearest = findNearestGarageForService(item.name);
-
-                if (!nearest) {
-                  alert('No garage offers this service nearby.');
-                  return;
-                }
-
+                if (!nearest) return alert('No garage nearby.');
                 navigation.navigate('StorePage', { garage: nearest });
               }}
             >
-              <Image
-                resizeMode="contain"
-                style={styles.quickServiceOptionImage}
-                source={item.src}
-              />
-              <Text style={styles.quickServiceOptionText}>{item.name}</Text>
+              <Image style={styles.quickServiceOptionImage} source={item.src} />
+              <Text>{item.name}</Text>
             </TouchableOpacity>
           )}
         />
       </ImageBackground>
 
-      <View style={styles.servicesContainer}>
-        <Text style={{ color: 'black', fontSize: 35, fontWeight: '800' }}>
+      <View style={{ margin: 10 }}>
+        <Text style={{ fontSize: 35, fontWeight: '800' }}>
           Available Nearby
         </Text>
-        <Text>Based on your car details and location.</Text>
-        <Text>Your Current Town: {userLoc ? userLoc.town.city : ''}</Text>
+        <Text>Based on your location.</Text>
+        <Text>Your Current Town: {userLoc ? userLoc.town.city : ''} </Text>
       </View>
     </>
   }
@@ -263,14 +250,11 @@ export default function HomeScreen() {
       />
 
       <View style={styles.serviceInfo}>
-        <Text
-          style={{ fontSize: 25, fontWeight: '900' }}
-          numberOfLines={2}
-        >
+        <Text style={{ fontSize: 22, fontWeight: '900' }}>
           {garage.Name}
         </Text>
 
-        <Text>{garage.Town}{garage.ElectricService ? <Text style={{color: "blue"}}> {'\u2022'} Electric Service </Text> : null} {`\n`}</Text>
+        <Text>{garage.Town}</Text>
 
         <Text numberOfLines={2}>
           {Object.keys(garage.Services).slice(0, 3).join(' | ')}
@@ -286,6 +270,8 @@ export default function HomeScreen() {
     </TouchableOpacity>
   )}
 />
+</View>
+
 
   );
 }
@@ -398,6 +384,8 @@ const styles = StyleSheet.create({
   serviceContainer:{
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+    zIndex: -999,
     height: 150,
     backgroundColor: '#f2f2f2f2',
     borderRadius: 10, 
