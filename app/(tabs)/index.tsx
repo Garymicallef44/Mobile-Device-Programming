@@ -4,35 +4,44 @@ import Navbar from '@/components/navbar';
 import { useNavigation } from "@react-navigation/native";
 import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useState } from 'react';
-import { FlatList, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig";
-import { getLoginSession } from '../backend/AsyncStorage';
+import { getLoginSession, getUserCarDetails } from '../backend/AsyncStorage';
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
 
-  
-type Service = {
-  Price: number;
-  RequireGarage: boolean;
-};
+ 
 
-type ServicesList = {
-  [serviceName: string]: Service;
-};
+  useEffect(() => {
+    console.log("Running account check")
+    if(!getUserCarDetails() || !getLoginSession()){
+      alert('Please login to an account before browsing.');
+    }
+    console.log("Running account check - seems to be fine")
+  },[]);
 
-type Garage = {
-  Coordinates: GeoPoint;
-  Description: string;
-  ElectricService: boolean;
-  Id: number;
-  Latitutde: number;
-  Longitude: number;
-  Location: string;
-  Name: string;
-  Rating: number;
-  Services: ServicesList;
-  Town: string;
-};
+  type Service = {
+    Price: number;
+    RequireGarage: boolean;
+  };
+
+  type ServicesList = {
+    [serviceName: string]: Service;
+  };
+
+  type Garage = {
+    Coordinates: GeoPoint;
+    Description: string;
+    ElectricService: boolean;
+    Id: number;
+    Latitutde: number;
+    Longitude: number;
+    Location: string;
+    Name: string;
+    Rating: number;
+    Services: ServicesList;
+    Town: string;
+  };
 
   type Garages = {
     garages: Garage[];
@@ -158,7 +167,7 @@ type Garage = {
     let loc;
     const retrieveUserLocation =  async () => {
       loc = await GetUserTownAndLocation();
-      console.log(`Retrieved loc ${loc?.town.city}`)
+      // console.log(`Retrieved loc ${loc?.town.city}`)
       setUserLoc(loc);
     }
     
@@ -171,80 +180,87 @@ type Garage = {
     const checkLogin = async () => {
       const loggedIn : boolean = await getLoginSession();
       if (!loggedIn){
-        navigation.navigate("account");
+        navigation.setOptions({
+           headerBackVisible: false,
+        });
+        // navigation.navigate("Login");
       }
     }
 
     checkLogin();
   }, [])
   return (
-        <ScrollView style={{backgroundColor: 'white'}}>
-          <Navbar />
-          <View style={{paddingTop: 90}} />
-          <ImageBackground source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')} imageStyle={{...StyleSheet.absoluteFillObject, resizeMode: "cover"}} resizeMode="stretch" className={"quick-services-section"} style={styles.quickServicesContainer}>
-              <Text style={styles.smallTitle}>Quick Service</Text>
-              <View style={{height: 100}}>
-                <FlatList numColumns={4} contentContainerStyle={{alignItems:'center', justifyContent: 'center', width: '100%'}} style={styles.quickServices} data={quickServices}
-                nestedScrollEnabled={true} scrollEnabled={true} keyExtractor={(item) => item.id.toString()} renderItem={({ item }) => 
-                  <TouchableOpacity
-                    style={styles.quickServiceOption}
-                    onPress={() => {
-                      const nearest = findNearestGarageForService(item.name);
+    <View>
+        <Navbar />
+<FlatList
+  style={{ backgroundColor: 'white' }}
+  data={garages}
+  // keyExtractor={(item) => item.Id.toString()}
+  contentContainerStyle={{ paddingBottom: 40 }}
+  ListHeaderComponent={
+    <>
+    
+      <View style={{ paddingTop: 90 }} />
 
-                      if (!nearest) {
-                        alert("No garage offers this service nearby.");
-                        return;
-                      }
+      <ImageBackground
+        source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')}
+        resizeMode="cover"
+        style={styles.quickServicesContainer}
+      >
+        <Text style={styles.smallTitle}>Quick Service</Text>
 
-                      navigation.navigate("StorePage", { garage: nearest });
-                    }}
-                  >
-                    <Image
-                      resizeMode={"contain"}
-                      style={styles.quickServiceOptionImage}
-                      source={item.src}
-                    />
-                    <Text style={styles.quickServiceOptionText}>{item.name}</Text>
-                  </TouchableOpacity>
-                  }
-                />
- 
-              </View>
-          </ImageBackground>
-          <View style={styles.servicesContainer}>
-            <Text style={{color: 'black', fontSize: 35, fontWeight: 800}}>Available Nearby</Text>
-            <Text style={{}}>Based on your car details and location.</Text>
-            <Text>Your Current Town: {userLoc ? userLoc.town.city : ""}</Text>
-            
-        <ScrollView
-          style={styles.servicesContent}
-          contentContainerStyle={{
-            flexGrow: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 15
-          }}
-        >
-  {garages.map((garage, index) => (
+        <FlatList
+          data={quickServices}
+          numColumns={3}
+          scrollEnabled={false}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.quickServiceOption}
+              onPress={() => {
+                const nearest = findNearestGarageForService(item.name);
+                if (!nearest) return alert('No garage nearby.');
+                navigation.navigate('StorePage', { garage: nearest });
+              }}
+            >
+              <Image style={styles.quickServiceOptionImage} source={item.src} />
+              <Text>{item.name}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </ImageBackground>
+
+      <View style={{ margin: 10 }}>
+        <Text style={{ fontSize: 35, fontWeight: '800' }}>
+          Available Nearby
+        </Text>
+        <Text>Based on your location.</Text>
+        <Text>Your Current Town: {userLoc ? userLoc.town.city : ''} </Text>
+      </View>
+    </>
+  }
+  renderItem={({ item: garage }) => (
     <TouchableOpacity
-      key={index}
       style={styles.serviceContainer}
-      onPress={() => navigation.navigate("StorePage", { garage })}
+      onPress={() => navigation.navigate('StorePage', { garage })}
     >
-      <Image style={styles.servicesImage} source={garageImages[garage.Id]} />
+      <Image
+        style={styles.servicesImage}
+        source={garageImages[garage.Id]}
+      />
 
       <View style={styles.serviceInfo}>
-        <Text style={{ fontSize: 25, fontWeight: '900' }} numberOfLines={2} ellipsizeMode="tail">
+        <Text style={{ fontSize: 22, fontWeight: '900' }}>
           {garage.Name}
         </Text>
 
         <Text>{garage.Town}</Text>
 
-        <Text style={{ flexShrink: 1 }} numberOfLines={2} ellipsizeMode="tail">
+        <Text numberOfLines={2}>
           {Object.keys(garage.Services).slice(0, 3).join(' | ')}
         </Text>
 
-        <Text style={{ fontWeight: 800 }}>
+        <Text style={{ fontWeight: '800' }}>
           {calculateGarageDistance(
             garage.Coordinates.latitude,
             garage.Coordinates.longitude
@@ -252,11 +268,11 @@ type Garage = {
         </Text>
       </View>
     </TouchableOpacity>
-  ))}
-</ScrollView>
+  )}
+/>
+</View>
 
-          </View>
-        </ScrollView>
+
   );
 }
 
@@ -349,7 +365,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   servicesContainer:{
-    height: 500,
+    height: 100,
     overflowY: 'scroll',
     backgroundColor: 'white',
     display: 'flex',
@@ -368,6 +384,8 @@ const styles = StyleSheet.create({
   serviceContainer:{
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+    zIndex: -999,
     height: 150,
     backgroundColor: '#f2f2f2f2',
     borderRadius: 10, 
@@ -375,6 +393,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     padding: 4,
+    marginBottom: 10,
     gap: 0
   },
 
