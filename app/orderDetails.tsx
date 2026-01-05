@@ -14,6 +14,7 @@ import {
 import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
 import { saveItem } from "../services/storage";
 import { getUserCarDetails } from "./backend/AsyncStorage";
+import { GetTownAndStreet } from "./backend/UserLocationService";
 
 export default function OrderDetailsPage() {
   const route = useRoute<any>();
@@ -196,7 +197,7 @@ export default function OrderDetailsPage() {
 
         {gps && (
           <Text style={styles.location}>
-            Selected: {gps.lat.toFixed(5)}, {gps.lng.toFixed(5)}
+            Location : {GetTownAndStreet(gps.lat, gps.lng)}
           </Text>
         )}
 
@@ -265,7 +266,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  location: { marginTop: 10, fontSize: 14, color: "green" },
+  location: { marginTop: 10, fontSize: 15, fontWeight: 500, color: "green" },
   totalBox: {
     marginTop: 30,
     padding: 15,
