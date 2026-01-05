@@ -64,6 +64,20 @@ export function calculateGarageUserDistance(userLoc : Coordinates, garageLoc : C
 }
 
 
+export async function GetTownAndStreet(latitude: number, longitude: number){
+    const res = await Location.reverseGeocodeAsync({
+      latitude: latitude,
+      longitude: longitude
+    })
+
+
+    if (res.length > 0 ) {
+      const place = res[0];
+      return `${place.street}, ${place.city}`
+    }
+
+}
+
 
 export async function GetUserTownAndLocation(){
     let { status } = await Location.requestForegroundPermissionsAsync();

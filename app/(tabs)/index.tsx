@@ -195,7 +195,6 @@ export default function HomeScreen() {
 <FlatList
   style={{ backgroundColor: 'white' }}
   data={garages}
-  // keyExtractor={(item) => item.Id.toString()}
   contentContainerStyle={{ paddingBottom: 40 }}
   ListHeaderComponent={
     <>
@@ -254,7 +253,8 @@ export default function HomeScreen() {
           {garage.Name}
         </Text>
 
-        <Text>{garage.Town}</Text>
+        <Text>{garage.Town}{garage.ElectricService ? <Text style={{"color": "blue"}}> • Electric Service </Text> : null} </Text>
+        <Text style={{fontWeight: 900}}></Text>
 
         <Text numberOfLines={2}>
           {Object.keys(garage.Services).slice(0, 3).join(' | ')}
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   quickServiceOptionImage:{
-    width: '90%',
+    width: '80%',
     height: '60%'
   },
   reactLogo: {

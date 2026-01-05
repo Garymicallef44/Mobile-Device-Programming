@@ -30,6 +30,9 @@ export default function SearchPage() {
   const garageImages: Record<number, any> = {
     1: require("../../MediaSources/AutoShops/1.jpg"),
     2: require("../../MediaSources/AutoShops/2.jpg"),
+    3 : require("../../MediaSources/AutoShops/3.jpg"),
+    4 : require("../../MediaSources/AutoShops/4.jpg")
+
   };
 
   useEffect(() => {
@@ -83,7 +86,7 @@ export default function SearchPage() {
     />
 
     {/* RESULTS */}
-    <ScrollView contentContainerStyle={{ paddingVertical: 20, gap: 15 }}>
+    <ScrollView contentContainerStyle={{ padding: 20, gap: 15 }}>
       {filtered.map((garage, index) => (
         <TouchableOpacity
           key={index}
@@ -93,7 +96,7 @@ export default function SearchPage() {
           <Image style={styles.image} source={garageImages[garage.Id]} />
 
           <View style={{ flex: 1 }}>
-            <Text style={styles.title}>{garage.Name}</Text>
+            <Text style={styles.title}>{garage.Name}</Text>{garage.ElectricService ? <Text style={{"color": "blue"}}> Electric Service </Text> : null}
             <Text>{garage.Town}</Text>
             <Text numberOfLines={1}>{Object.keys(garage.Services).slice(0, 3).join(" • ")}</Text>
 
