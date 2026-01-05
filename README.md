@@ -1,50 +1,61 @@
-# Welcome to your Expo app 👋
+# Usability Study for Servify
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## How to set up and run the app using android studio
 
-## Get started
+Download the project folder from our github repository at  
+https://github.com/Garymicallef44/Mobile-Device-Programming
 
-1. Install dependencies
+Go to the project root directory and create a text file named `.env`, open it and paste these contents into it:
 
-   ```bash
-   npm install
-   ```
+```env
+EXPO_PUBLIC_FIREBASE_API_KEY="AIzaSyB-OYwubrmTaZThyaapsaBkME13fNRKD-c"
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN="servifyapp-9d5dc.firebaseapp.com"
+EXPO_PUBLIC_FIREBASE_PROJECT_ID="servifyapp-9d5dc"
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET="servifyapp-9d5dc.firebasestorage.app"
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="224238467474"
+EXPO_PUBLIC_FIREBASE_APP_ID="1:224238467474:web:bc3d7ea71b313aaf93694b"
+EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID="G-SDL72MZVDP"
+EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_51RiNqdDHQ8Epd27Sk57L3A1A5a2M5BUAMzEnxbe4sr9xS7pMt02J1QBCondaJZdVUDWr8flDlQjJbv7uKUsby1q400HCiwWgxz"
+Once this is done, save and navigate to the backend folder in the root directory. Create another .env file and paste these contents into it:
 
-2. Start the app
+STRIPE_SECRET_KEY="sk_test_51RiNqdDHQ8Epd27SNFL2tzyYJqUHyYuq0EmQBLtOn2Q8MsJxgWOPUyT2YZGZvZINXsm557I3RIKmZhuw6JXJn29G00ccEnQgmm"
 
-   ```bash
-   npx expo start
-   ```
+Open android studio and click on device manager. Run an android device if you have one. If not, then create one by clicking:
+Add a new device > Create Virtual Device > Pixel 9 Pro > VanillaIceCream > Finish.
 
-In the output, you'll find options to open the app in a
+Once the virtual device is running, open command prompt and enter the command:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+cd (insert project directory here)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Once the directory is open, execute the commands:
 
-## Get a fresh project
+npm install
+cd backend
 
-When you're ready, run:
+When the directory has been changed to backend execute these following commands:
 
-```bash
-npm run reset-project
-```
+npm init -y
+npm install express stripe cors
+node server.js
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Keep this window open as it is running the server in the background.
 
-## Learn more
+To run the app itself open another command prompt and execute:
 
-To learn more about developing your project with Expo, look at the following resources:
+npx expo start
+in the project directory
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Once the app has started, press a and the app should install and open on the virtual device automatically.
 
-## Join the community
+## Participant Tasks
+Task: Create an account or sign in.
 
-Join our community of developers creating universal apps.
+Task: Order a service.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Task: Modify your garage.
+
+Task: Check your service history.
+
+Task: Search for a service.
+
+Task: Order a service from Pitstop Pulse.
