@@ -156,11 +156,10 @@ export default function OrderDetailsPage() {
         />
 
       {/* Map */}
-      <Text style={[styles.label, { marginTop: 20 }]}>
+      <Text style={[styles.label, { marginTop: 20, fontSize:20}]}>
         {requiresGarageVisit ? "Garage Location" : "Select Service Location"}
       </Text>
-
-      <Text style={[styles.label, { marginTop: 40 }]}>
+      <Text style={[styles.label, { marginTop: 5}]}>
         {requiresGarageVisit ? "Your selected service/s require a visit to the garage." : "Please select the location where you want the service to be performed on the map below."}
       </Text>
 
