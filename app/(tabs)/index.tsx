@@ -2,12 +2,22 @@ import { GetUserTownAndLocation, UserLocation } from '@/app/backend/UserLocation
 import { garageImages } from '@/components/garageImages';
 import Navbar from '@/components/navbar';
 import { useNavigation } from "@react-navigation/native";
-import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
+import * as Notifications from 'expo-notifications';
+import { addDoc, collection, GeoPoint, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from 'react';
-import { FlatList, Image, ImageBackground, LogBox, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { db } from "../../firebaseConfig";
-import { getLoginSession, getUserCarDetails } from '../backend/AsyncStorage';
-export default function HomeScreen() {
+import { Alert, FlatList, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { db } from "../../firebaseConfig.js";
+import { getName, saveName } from '../../services/storage';
+import { getLoginSession } from '../backend/AsyncStorage';
+export default  function HomeScreen() {
+ 
+      registerForPushNotifsAndSaveName();
+      
+    
+  
+      
+    
+    
   const navigation = useNavigation<any>();
   LogBox.ignoreAllLogs();
  
@@ -121,7 +131,7 @@ export default function HomeScreen() {
         nearest = g;
       }
     }
-
+    
     return nearest;
   };
 
@@ -283,6 +293,35 @@ export default function HomeScreen() {
 
 
   );
+}
+
+
+  
+async function registerForPushNotifsAndSaveName(){
+  const {status: existingStatus} = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+  if(existingStatus!== "granted"){
+    const {status} = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+  if (finalStatus !== "granted"){
+    Alert.alert("Unable to grant notification access");
+    return null;
+  }
+  const token = ((await Notifications.getExpoPushTokenAsync()).data);
+  
+  let q = query(collection(db,"devices"),where("token","==",token));
+  if ((await getDocs(q)).empty){
+    await addDoc(collection(db, "devices"),{
+      token:token
+    });
+  }
+  q = query(collection(db,"devices"),where("token","==",token));
+  let docs = await getDocs(q);
+  
+  saveName({name: docs.docs[0].id});
+  // console.log((await getName())[0].name);
+  return (await getName())[0].name;
 }
 
 const styles = StyleSheet.create({

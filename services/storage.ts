@@ -6,6 +6,9 @@ export type HistoryInstance = {
         
         price: number
     }
+export type Name = {
+    name:string
+}
 export const saveItem = async(item: HistoryInstance)=>{
     try {
         const existingData = await AsyncStorage.getItem("@history");
@@ -25,5 +28,26 @@ export const getItems = async () =>{
     }catch(e){
         console.log("Fail: "+e);
         return [];
+    }
+}
+export const saveName = async(item: Name)=>{
+    try {
+        const existingData = await AsyncStorage.getItem("@name");
+        const currentName = existingData ?JSON.parse(existingData):[];
+        currentName.unshift(item);
+        const nameStr = JSON.stringify(currentName);
+        await AsyncStorage.setItem('@name',nameStr);
+    }catch(e){
+        console.log("Fail: "+ e);
+    }
+}
+export const getName = async () =>{
+    try{
+        const existingData = await AsyncStorage.getItem('@name');
+        
+        return existingData ?JSON.parse(existingData):'';
+    }catch(e){
+        console.log("Fail: "+e);
+        return '';
     }
 }

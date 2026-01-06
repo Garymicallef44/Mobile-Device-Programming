@@ -1,10 +1,12 @@
-require("dotenv").config({ path: __dirname + "/.env" });
+require("dotenv").config({ path:".env" });
 
 
 const express = require("express");
 const cors = require("cors");
 const Stripe = require("stripe");
-
+const firestore = require("firebase/firestore");
+const fbConfig = require("../firebaseConfig.cjs");
+ 
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -13,7 +15,6 @@ app.use(cors());
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // PAYMENT INTENT (PaymentSheet)
-
 app.post("/create-payment-intent", async(req, res) => {
     try {
         const { price } = req.body;
@@ -74,7 +75,46 @@ app.post("/create-checkout-session", async(req, res) => {
 });
 
 
+app.post("/send-notif",async(req,res)=>{
+    try{
+        const {id, title,msg} = req.body;
+        console.log("Connected");
+        
 
+
+    const devices = firestore.collection(fbConfig.db,"devices");
+    
+    const q = firestore.query(devices,firestore.where(firestore.documentId(),"==",id));
+    const docs = await firestore.getDocs(q);
+    
+    // console.log(docs.docs[0].get("token"));
+    if (docs.empty){
+        return res.status(404).json({success:false, error: "No Device found"});
+    }
+    let token= docs.docs[0].get("token");
+    
+    const response = await fetch("https://exp.host/--/api/v2/push/send",{
+      method:"POST",
+      headers:{"Content-Type":"application/json",
+        "Accept":"application/json",
+        "Accept-Encoding":"gzip, deflate"
+      },
+      body: JSON.stringify({
+        to:token,
+        sound:"default",
+        title:title,
+        body:msg,
+        
+      }),
+    });
+
+    const data = await response.json();
+    res.status(200).json({success:true, data});
+  }catch(err){
+    console.error("Error sending notification:",err);
+    res.status(500).json({success:false, error:err.message});
+  }
+});
 app.listen(3000, () => {
     console.log("🚀 Backend running on http://localhost:3000");
 });

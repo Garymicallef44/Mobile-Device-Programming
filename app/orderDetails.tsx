@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
-import { saveItem } from "../services/storage";
+import { getName, saveItem } from "../services/storage";
 import { getUserCarDetails } from "./backend/AsyncStorage";
 import { GetTownAndStreet } from "./backend/UserLocationService";
 
@@ -137,9 +137,28 @@ export default function OrderDetailsPage() {
       location = gps.lng.toString();
     }
     saveItem({name:serviceStr,garageName:garage?.Name,date:new Date(),price:price.toFixed(2)});
+     let name = await getName();
+     sendNotif(name,'Servify', 'You have paid '+price.toFixed(2))
     }
   };
-
+  const sendNotif = async (id:string,title:string,message:string)=>{
+  try{
+    const response = await fetch("http://10.0.2.2:3000/send-notif",{
+      method:"POST",
+      headers:{"Content-Type": "application/json"},
+      body: JSON.stringify({
+        id:id,
+        title:title,
+        msg:message,
+        
+      }),
+    });
+    console.log(response);
+    const data= await response.json();
+  }catch(err){
+    console.error("Error sending notification:",err);
+  }
+};
   return (
     <>
       <Stack.Screen options={{ title: "Garages Near You" }} />

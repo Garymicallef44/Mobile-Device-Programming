@@ -13,6 +13,12 @@
       "bundleIdentifier": "com.anonymous.ServifyApp"
     },
     "android": {
+      "package": "com.uom.servify",
+      "config":{
+        "googleMaps": {
+          "apiKey": "AIzaSyDZ2seQZJH9fxJK2LECGERNbiLm9NAuWnA"
+        }
+      },
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -39,7 +45,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
