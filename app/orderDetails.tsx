@@ -1,8 +1,8 @@
 import { useRoute } from "@react-navigation/native";
 import { useStripe } from "@stripe/stripe-react-native";
 import * as Location from "expo-location";
+import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
-
 import {
   ScrollView,
   StyleSheet,
@@ -91,7 +91,7 @@ export default function OrderDetailsPage() {
   // PAYMENT
   const payNow = async () => {
 
-    if(!getUserCarDetails()) return alert("Yo man get a car bitchass");
+    if(!getUserCarDetails()) return alert("Please enter your car details.");
     if (!phone) return alert("Please enter phone number");
     if (!gps) return alert("Please select a location on the map");
 
@@ -142,6 +142,7 @@ export default function OrderDetailsPage() {
 
   return (
     <>
+      <Stack.Screen options={{ title: "Garages Near You" }} />
       <ScrollView style={styles.container}>
         <Text style={styles.title}>Order Details</Text>
 

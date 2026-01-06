@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { setLoginSession } from './backend/AsyncStorage';
 import { useAuth } from './contexts/AuthContext';
 
 export default function AccountScreenLogin() {
@@ -72,25 +73,26 @@ export default function AccountScreenLogin() {
         console.log('signUp completed');
         navigation.navigate("garage");
       }
+      setLoginSession(true);
       // Clear form on success
       setEmail('');
       setPassword('');
       setConfirmPassword('');
       setDisplayName('');
-      console.log('Form cleared');
     } catch (error: any) {
-      console.log('Caught error:', error);
-      const errorMessage = error.message || 'An error occurred';
-      Alert.alert('Error', errorMessage);
+      switch(error.message){
+        case "Firebase: Error (auth/invalid-credential).": Alert.alert("Invalid Credential", "Make sure you enter the correct email address or password.");
+         case "Firebase: Password should be at least 6 characters (auth/weak-password).": Alert.alert("Weak Password", "Ensure that your password contains at least 6 characters.");
+      }
     } finally {
       setLoading(false);
-      console.log('Loading set to false');
     }
   };
 
   const handleLogout = async () => {
     try {
       await logout();
+      setLoginSession(false);
     } catch (error: any) {
       Alert.alert('Error', error.message);
     }
