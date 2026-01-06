@@ -46,7 +46,7 @@ export default function ServicePage() {
 
   const navigation = useNavigation<any>();
 
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);;
 
   const [isElectric, setIsElectric] = useState<boolean>(false);
   const { garage } = route.params; 
