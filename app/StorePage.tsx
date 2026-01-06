@@ -105,7 +105,7 @@ export default function ServicePage() {
      
       <View style={styles.section}>
         <Text style={styles.heading}>Select Services</Text>
-         {(isElectric && !garage.ElectricService) ? <Text style={styles.description, {fontWeight: 900, marginBottom:10}}>Note: Your electric car may be limited to some services, please check to ensure a correct order placement.</Text> : null}
+         {(isElectric && !garage.ElectricService) ? <Text style={[styles.description, {fontWeight: 900, marginBottom:10}]}>Note: Your electric car may be limited to some services, please check to ensure a correct order placement.</Text> : null}
   
         {services.map((s, i) => {
           let isSelected = selected.includes(i)
