@@ -1,4 +1,5 @@
 
+import Navbar from "@/components/navbar";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -22,7 +23,10 @@ export default function HistoryPage(){
     //load from firebase
     // we want to create a list of history cards
      return (
+      <>
+      <Navbar />
       <ScrollView>
+        
       
       
       
@@ -50,5 +54,6 @@ export default function HistoryPage(){
       ))}
     </View>
     </ScrollView>
+    </>
   );
 }

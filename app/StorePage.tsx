@@ -1,8 +1,9 @@
 import { garageImages } from "@/components/garageImages";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { getUserCarDetails } from "./backend/AsyncStorage";
 
 
 type Service = {
@@ -45,8 +46,9 @@ export default function ServicePage() {
 
   const navigation = useNavigation<any>();
 
-  const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
+  const [isElectric, setIsElectric] = useState<boolean>(false);
   const { garage } = route.params; 
 
   const [selected, setSelected] = useState<number[]>([]);
@@ -66,6 +68,20 @@ export default function ServicePage() {
 
   };
 
+  useEffect(() => {
+    const run = async () => {
+      const carDetails = await getUserCarDetails();
+
+      if(!carDetails){
+        alert("Please enter your car details to proceed with ordering.");
+        navigation.navigate("garage");
+      }else{
+        setIsElectric(carDetails.engineType === "Electric");
+      }
+    }
+
+    run();
+  }, [])
  
 
  
@@ -85,11 +101,12 @@ export default function ServicePage() {
         <Text style={styles.description}>
           {garage.Description}
         </Text>
-      </View>
-
+    </View>
+     
       <View style={styles.section}>
         <Text style={styles.heading}>Select Services</Text>
-
+         {(isElectric && !garage.ElectricService) ? <Text style={styles.description, {fontWeight: 900, marginBottom:10}}>Note: Your electric car may be limited to some services, please check to ensure a correct order placement.</Text> : null}
+  
         {services.map((s, i) => {
           let isSelected = selected.includes(i)
           return (

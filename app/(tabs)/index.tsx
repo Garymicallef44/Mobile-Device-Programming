@@ -4,20 +4,29 @@ import Navbar from '@/components/navbar';
 import { useNavigation } from "@react-navigation/native";
 import { collection, GeoPoint, getDocs, query } from "firebase/firestore";
 import { useEffect, useState } from 'react';
-import { FlatList, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, ImageBackground, LogBox, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig";
 import { getLoginSession, getUserCarDetails } from '../backend/AsyncStorage';
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
-
+  LogBox.ignoreAllLogs();
  
 
   useEffect(() => {
     console.log("Running account check")
-    if(!getUserCarDetails() || !getLoginSession()){
-      alert('Please login to an account before browsing.');
+    const check = async () => {
+      const session =  await getLoginSession();
+      if (!session) {
+        navigation.navigate("Login");
+      }
+
+      const car = await getUserCarDetails();
+
+      if (!car) {
+        navigation.navigate("garage");
+      }
     }
-    console.log("Running account check - seems to be fine")
+    check();
   },[]);
 
   type Service = {
@@ -233,13 +242,13 @@ export default function HomeScreen() {
         <Text style={{ fontSize: 35, fontWeight: '800' }}>
           Available Nearby
         </Text>
-        <Text>Based on your location.</Text>
-        <Text>Your Current Town: {userLoc ? userLoc.town.city : ''} </Text>
+        <Text style={{fontWeight: 900, fontSize: 15}}>Based on your location.</Text>
+        <Text style={{fontWeight: 900, fontSize: 15}}>Your Current Town: {userLoc ? userLoc.town.city : ''} </Text>
       </View>
     </>
   }
   renderItem={({ item: garage }) => (
-    <TouchableOpacity
+   <TouchableOpacity
       style={styles.serviceContainer}
       onPress={() => navigation.navigate('StorePage', { garage })}
     >
