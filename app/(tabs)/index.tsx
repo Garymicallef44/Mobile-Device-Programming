@@ -5,10 +5,10 @@ import { useNavigation } from "@react-navigation/native";
 import * as Notifications from 'expo-notifications';
 import { addDoc, collection, GeoPoint, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, ImageBackground, LogBox, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig.js";
 import { getName, saveName } from '../../services/storage';
-import { getLoginSession } from '../backend/AsyncStorage';
+import { getLoginSession, getUserCarDetails } from '../backend/AsyncStorage';
 export default  function HomeScreen() {
  
       registerForPushNotifsAndSaveName();
