@@ -1,9 +1,11 @@
 import { useRoute } from "@react-navigation/native";
 import { useStripe } from "@stripe/stripe-react-native";
 import * as Location from "expo-location";
-import { Stack } from "expo-router";
-import { useEffect, useState } from "react";
+import { useRouter, Stack } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
+
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -18,12 +20,15 @@ import { GetTownAndStreet } from "./backend/UserLocationService";
 
 export default function OrderDetailsPage() {
   const route = useRoute<any>();
-  const { garage, price, services } = route.params;
-  const requiresGarageVisit = services.some(
-  (s: any) => s.RequireGarage === true
- );
-
+  const router = useRouter();
   const stripe = useStripe();
+
+  const { garage, price, services } = route.params;
+
+  const requiresGarageVisit = useMemo(
+    () => services.some((s: any) => s.RequireGarage === true),
+    [services]
+  );
 
   const [phone, setPhone] = useState("");
   const [gps, setGps] = useState<{ lat: number; lng: number } | null>(null);
@@ -34,14 +39,20 @@ export default function OrderDetailsPage() {
     longitudeDelta: 0.01,
   });
 
-  // Ask for location permission on mount
-    useEffect(() => {
-      if (!requiresGarageVisit) {
-        requestLocation();
-      }
-    }, [requiresGarageVisit]);
+  // UI states
+  const [paying, setPaying] = useState(false);
+  const [locationText, setLocationText] = useState<string>("");
+  const [resolvingLocation, setResolvingLocation] = useState(false);
 
+  // Ask for location permission on mount (only when mobile service)
+  useEffect(() => {
+    if (!requiresGarageVisit) {
+      requestLocation();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requiresGarageVisit]);
 
+  // If a garage visit is required, pin map to garage
   useEffect(() => {
     if (requiresGarageVisit && garage?.Coordinates) {
       updateMapToLocation(
@@ -49,26 +60,31 @@ export default function OrderDetailsPage() {
         garage.Coordinates.longitude
       );
     }
-  }, [requiresGarageVisit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requiresGarageVisit, garage]);
 
   const requestLocation = async () => {
-  const { status, canAskAgain } = await Location.getForegroundPermissionsAsync();
+    try {
+      const { status } = await Location.getForegroundPermissionsAsync();
 
-  if (status !== "granted") {
-    const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
-    if (newStatus !== "granted") {
-      alert("Location permission required.");
-      return;
+      if (status !== "granted") {
+        const { status: newStatus } =
+          await Location.requestForegroundPermissionsAsync();
+        if (newStatus !== "granted") {
+          alert("Location permission required.");
+          return;
+        }
+      }
+
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      updateMapToLocation(loc.coords.latitude, loc.coords.longitude);
+    } catch (e) {
+      alert("Failed to get location. Please try again.");
     }
-  }
-
-  const loc = await Location.getCurrentPositionAsync({
-    accuracy: Location.Accuracy.High,
-  });
-
-  updateMapToLocation(loc.coords.latitude, loc.coords.longitude);
-};
-
+  };
 
   const updateMapToLocation = (lat: number, lng: number) => {
     setRegion({
@@ -81,64 +97,141 @@ export default function OrderDetailsPage() {
     setGps({ lat, lng });
   };
 
-  // When user taps the map
+  // When user taps the map (only mobile service)
   const onMapPress = (event: MapPressEvent) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     updateMapToLocation(latitude, longitude);
   };
 
+  // Resolve address text when gps changes (avoid rendering a Promise / repeated calls)
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolve = async () => {
+      if (!gps) {
+        setLocationText("");
+        return;
+      }
+
+      // For garage visit, display garage info instead of reverse geocoding
+      if (requiresGarageVisit) {
+        const gTown = garage?.Town ?? garage?.city ?? "";
+        const gLoc = garage?.Location ?? garage?.location ?? "";
+        setLocationText(`${gTown} ${gLoc}`.trim());
+        return;
+      }
+
+      setResolvingLocation(true);
+      try {
+        const txt = await GetTownAndStreet(gps.lat, gps.lng);
+        if (!cancelled) setLocationText(String(txt ?? ""));
+      } catch {
+        if (!cancelled) setLocationText(`${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`);
+      } finally {
+        if (!cancelled) setResolvingLocation(false);
+      }
+    };
+
+    resolve();
+    return () => {
+      cancelled = true;
+    };
+  }, [gps, requiresGarageVisit, garage]);
+
+  const buildServiceStr = () => {
+    if (!services || services.length === 0) return "";
+    if (services.length === 1) return services[0].name;
+
+    const names = services.map((s: any) => s.name);
+    const last = names.pop();
+    return `${names.join(", ")} and ${last}`;
+  };
 
   // PAYMENT
   const payNow = async () => {
+    if (paying) return;
+
+    // AsyncStorage functions are usually async — handle both cases safely
+    const car = await Promise.resolve(getUserCarDetails());
+    if (!car) return alert("Please add a car before placing an order.");
 
     if(!getUserCarDetails()) return alert("Please enter your car details.");
     if (!phone) return alert("Please enter phone number");
     if (!gps) return alert("Please select a location on the map");
 
-    const response = await fetch("http://10.0.2.2:3000/create-payment-intent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ price }),
-    });
+    setPaying(true);
 
-    const json = await response.json();
-    const clientSecret = json.clientSecret;
+    try {
+      // NOTE: 10.0.2.2 works on Android emulator only.
+      // If you are using a real phone, change this to your PC LAN IP or use ngrok.
+      const response = await fetch("http://10.0.2.2:3000/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ price }),
+      });
 
-    const initSheet = await stripe.initPaymentSheet({
-      paymentIntentClientSecret: clientSecret,
-      merchantDisplayName: "Garage Services",
-    });
+      if (!response.ok) {
+        const errText = await response.text();
+        console.log("PaymentIntent HTTP error:", response.status, errText);
+        alert("Failed to start payment. Please try again.");
+        return;
+      }
 
-    if (initSheet.error) return alert("Error initializing payment");
+      const json = await response.json();
+      const clientSecret = json.clientSecret;
 
-    const payment = await stripe.presentPaymentSheet();
+      if (!clientSecret) {
+        alert("Payment setup failed: missing client secret.");
+        return;
+      }
 
-    if (payment.error){ alert("Payment failed");}
-    else {
-      alert("Payment complete!");
-      let serviceStr = '';
-    if (services.length > 1){
-      let serviceNames = services.map((s:any)=>
-          s.name
-      );
-      let last = serviceNames.pop();
-      serviceStr =  serviceNames.join(', ') + " and " +  last;
-    }else{
-      serviceStr = services[0].name;
-    }
-    console.log(serviceStr);
-    let city= '';
-    let location= '';
-    if(requiresGarageVisit){
-      city=garage?.city;
-      location=garage?.location;
-    }else{
-      city = gps.lat.toString();
-      location = gps.lng.toString();
-    }
-    saveItem({name:serviceStr,garageName:garage?.Name,date:new Date(),price:price.toFixed(2)});
-     let name = await getName();
-     sendNotif(name,'Servify', 'You have paid '+price.toFixed(2))
+      const initSheet = await stripe.initPaymentSheet({
+        paymentIntentClientSecret: clientSecret,
+        merchantDisplayName: "Garage Services",
+      });
+
+      if (initSheet.error) {
+        console.log("initPaymentSheet error:", initSheet.error);
+        alert(initSheet.error.message ?? "Error initializing payment");
+        return;
+      }
+
+      const payment = await stripe.presentPaymentSheet();
+
+if (payment.error) {
+  alert(payment.error.message ?? "Payment failed");
+  return;
+}
+
+// ✅ Payment succeeded
+const serviceStr = buildServiceStr();
+
+saveItem({
+  name: serviceStr,
+  garageName: garage?.Name,
+  date: new Date(),
+  price: price.toFixed(2),
+});
+
+// Send notification (from main branch logic)
+const name = await getName();
+sendNotif(name, "Servify", "You have paid €" + price.toFixed(2));
+
+const mode = requiresGarageVisit ? "garage" : "mobile";
+const locationTextToPass = requiresGarageVisit
+  ? `${garage?.Town ?? garage?.city ?? ""} ${garage?.Location ?? garage?.location ?? ""}`.trim()
+  : (locationText || `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`);
+
+router.replace({
+  pathname: "/confirmation",
+  params: {
+    total: price.toFixed(2),
+    garageName: garage?.Name ?? "",
+    services: serviceStr,
+    mode,
+    locationText: locationTextToPass,
+  },
+});
     }
   };
   const sendNotif = async (id:string,title:string,message:string)=>{
@@ -175,15 +268,15 @@ export default function OrderDetailsPage() {
           keyboardType="phone-pad"
         />
 
-      {/* Map */}
-      <Text style={[styles.label, { marginTop: 20, fontSize:20}]}>
-        {requiresGarageVisit ? "Garage Location" : "Select Service Location"}
-      </Text>
-      <Text style={[styles.label, { marginTop: 5}]}>
-        {requiresGarageVisit ? "Your selected service/s require a visit to the garage." : "Please select the location where you want the service to be performed on the map below."}
-      </Text>
-
-      
+        {/* Map */}
+        <Text style={[styles.label, { marginTop: 20, fontSize: 20 }]}>
+          {requiresGarageVisit ? "Garage Location" : "Select Service Location"}
+        </Text>
+        <Text style={[styles.label, { marginTop: 5 }]}>
+          {requiresGarageVisit
+            ? "Your selected service/s require a visit to the garage."
+            : "Please select the location where you want the service to be performed on the map below."}
+        </Text>
 
         <MapView
           style={styles.map}
@@ -193,7 +286,6 @@ export default function OrderDetailsPage() {
           zoomEnabled={!requiresGarageVisit}
           rotateEnabled={!requiresGarageVisit}
         >
-
           {gps && (
             <Marker
               draggable={!requiresGarageVisit}
@@ -208,47 +300,59 @@ export default function OrderDetailsPage() {
         </MapView>
 
         {!requiresGarageVisit && (
-          <TouchableOpacity style={styles.gpsButton} onPress={requestLocation}>
+          <TouchableOpacity
+            style={styles.gpsButton}
+            onPress={requestLocation}
+            disabled={paying}
+          >
             <Text style={styles.gpsButtonText}>Use Current Location</Text>
           </TouchableOpacity>
         )}
 
-
-        {gps && (
-          <Text style={styles.location}>
-            Location : {GetTownAndStreet(gps.lat, gps.lng)}
-          </Text>
+        {!!gps && (
+          <View style={{ marginTop: 10 }}>
+            <Text style={styles.location}>
+              Location:{" "}
+              {resolvingLocation ? "Resolving..." : locationText || "—"}
+            </Text>
+            {resolvingLocation && (
+              <View style={{ marginTop: 8 }}>
+                <ActivityIndicator />
+              </View>
+            )}
+          </View>
         )}
 
         {/* Total */}
         <View style={styles.servicesList}>
-          <Text style={[styles.label, { marginBottom: 10 }]}>Selected Services</Text>
+          <Text style={[styles.label, { marginBottom: 10 }]}>
+            Selected Services
+          </Text>
+
           {services.map((s: any, i: number) => (
-            <View key={i}> 
-              <Text style={styles.serviceItem}> 
-                {s.name}: €{s.Price.toFixed(2)} 
+            <View key={i}>
+              <Text style={styles.serviceItem}>
+                {s.name}: €{s.Price.toFixed(2)}
               </Text>
-
             </View>
-
           ))}
 
           <View style={styles.totalBox}>
             <Text style={styles.totalText}>Total</Text>
-            <Text style={styles.totalAmount}>
-              €{price.toFixed(2)}
-          </Text>
+            <Text style={styles.totalAmount}>€{price.toFixed(2)}</Text>
+          </View>
         </View>
-        </View>
-
-
-
-
       </ScrollView>
 
       <View style={styles.paybtncontainer}>
-        <TouchableOpacity style={styles.payButton} onPress={payNow}>
-            <Text style={styles.payButtonText}>Pay Now €{price.toFixed(2)}</Text>
+        <TouchableOpacity
+          style={[styles.payButton, paying ? styles.payButtonDisabled : null]}
+          onPress={payNow}
+          disabled={paying}
+        >
+          <Text style={styles.payButtonText}>
+            {paying ? "Processing..." : `Pay Now €${price.toFixed(2)}`}
+          </Text>
         </TouchableOpacity>
       </View>
     </>
@@ -256,7 +360,7 @@ export default function OrderDetailsPage() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "white"},
+  container: { flex: 1, padding: 20, backgroundColor: "white" },
   title: { fontSize: 30, fontWeight: "700", marginBottom: 20 },
   label: { fontSize: 16, fontWeight: "600", marginTop: 15 },
   input: {
@@ -285,7 +389,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  location: { marginTop: 10, fontSize: 15, fontWeight: 500, color: "green" },
+  location: { fontSize: 15, fontWeight: "500", color: "green" },
   totalBox: {
     marginTop: 30,
     padding: 15,
@@ -302,31 +406,34 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: "center",
     marginTop: 30,
-    marginBottom: 30
+    marginBottom: 30,
+  },
+  payButtonDisabled: {
+    opacity: 0.6,
   },
   payButtonText: { color: "#fff", fontSize: 18, fontWeight: "700" },
   servicesList: {
     display: "flex",
     flexDirection: "column",
     marginTop: 10,
-    height: 'auto',
-    backgroundColor: '#fafafa',
+    height: "auto",
+    backgroundColor: "#fafafa",
     padding: 10,
     borderRadius: 8,
-    gap: 5
+    gap: 5,
   },
   serviceItem: {
     fontSize: 16,
-    width: '100%',
-    height: 'auto',
-    backgroundColor: '#ff4800ff',
-    color: 'white',
+    width: "100%",
+    height: "auto",
+    backgroundColor: "#ff4800ff",
+    color: "white",
     padding: 10,
     borderRadius: 8,
   },
   paybtncontainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     paddingHorizontal: 20,
     paddingBottom: 40,
-  }
+  },
 });
