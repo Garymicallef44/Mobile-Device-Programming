@@ -31,7 +31,7 @@ export default function HistoryPage(){
       
       
     <View style={{
-      paddingTop:30,
+      paddingTop:70,
       paddingLeft:15,
       paddingRight:15
     }}>
