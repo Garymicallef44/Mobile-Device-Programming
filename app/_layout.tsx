@@ -31,7 +31,7 @@ export default function RootLayout() {
       <StripeProvider publishableKey={stripePk ?? ""}>
         <SafeAreaProvider>
           <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-            <Stack screenOptions={{ headerShown: false }}>
+            <Stack screenOptions={{ headerShown: true }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
               <Stack.Screen
