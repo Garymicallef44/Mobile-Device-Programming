@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
@@ -82,11 +82,6 @@ export default function Navbar() {
                                 <TouchableOpacity style={styles.menuItem} onPress={() => router.push("/history")}>
                                     <Ionicons name="time" size={24} color="#000" style={styles.menuIcon} />
                                     <Text style={styles.menuText}>Service History</Text>
-                                </TouchableOpacity>
-                                
-                                <TouchableOpacity style={styles.menuItem} onPress={() => { toggleMenu(); Alert.alert("Settings", "Settings page does not currently exist"); }}>
-                                    <Ionicons name="settings" size={24} color="#000" style={styles.menuIcon} />
-                                    <Text style={styles.menuText}>Settings</Text>
                                 </TouchableOpacity>
                             </View>
 

@@ -1,6 +1,6 @@
 import { garageImages } from "@/components/garageImages";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import { useNavigation } from "expo-router";
+import { Stack, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { getUserCarDetails } from "./backend/AsyncStorage";
@@ -91,7 +91,12 @@ export default function ServicePage() {
         source={garageImages[garage.Id] }
         style={styles.headerImage}
       />
-
+      <Stack.Screen
+          options={{
+            title: "Store Page",
+            headerBackTitle: "Back",
+          }}
+        />
       <View style={styles.section}>
         <Text style={styles.title}>{garage.Name}</Text>
         <Text style={styles.address}>Address - {garage.Location}, {garage.Town}</Text>

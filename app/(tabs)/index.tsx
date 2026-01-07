@@ -5,39 +5,39 @@ import { useNavigation } from "@react-navigation/native";
 import * as Notifications from 'expo-notifications';
 import { addDoc, collection, GeoPoint, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, Image, ImageBackground, LogBox, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, ImageBackground, LogBox, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from "../../firebaseConfig.js";
 import { getName, saveName } from '../../services/storage';
 import { getLoginSession, getUserCarDetails } from '../backend/AsyncStorage';
-export default  function HomeScreen() {
- 
-      registerForPushNotifsAndSaveName();
-      
-    
-  
-      
-    
-    
+export default function HomeScreen() {
+
+  useEffect(() => {
+    registerForPushNotifsAndSaveName();
+  }, []);
+
   const navigation = useNavigation<any>();
   LogBox.ignoreAllLogs();
- 
+
 
   useEffect(() => {
     console.log("Running account check")
     const check = async () => {
-      const session =  await getLoginSession();
+      const session = await getLoginSession();
       if (!session) {
         navigation.navigate("Login");
+        return;
       }
 
       const car = await getUserCarDetails();
 
       if (!car) {
         navigation.navigate("garage");
+        return;
       }
+
     }
     check();
-  },[]);
+  }, []);
 
   type Service = {
     Price: number;
@@ -67,44 +67,44 @@ export default  function HomeScreen() {
   }
 
 
-  const [userLoc, setUserLoc] = useState<UserLocation | null >();
+  const [userLoc, setUserLoc] = useState<UserLocation | null>();
   const [garages, setGarages] = useState<Garage[]>([]);
 
   const SERVICE_KEYWORDS: Record<string, string> = {
-  "Car Wash": "wash",
-  "Tyre Change": "tyre",
-  "Towing": "tow"
+    "Car Wash": "wash",
+    "Tyre Change": "tyre",
+    "Towing": "tow"
   };
 
 
   const quickServices = [
-    {id: 0, name: "Car Wash", src: require("../../MediaSources/Symbols/car-wash.png")},
-    {id: 1, name: "Tyre Change", src: require("../../MediaSources/Symbols/tyrechange.png")},
-    {id: 2, name: "Towing", src: require("../../MediaSources/Symbols/towing.png")}
+    { id: 0, name: "Car Wash", src: require("../../MediaSources/Symbols/car-wash.png") },
+    { id: 1, name: "Tyre Change", src: require("../../MediaSources/Symbols/tyrechange.png") },
+    { id: 2, name: "Towing", src: require("../../MediaSources/Symbols/towing.png") }
   ]
 
 
-  const calculateGarageDistance = (gLatitude : number, gLongitude : number) : string => {
-      if (!userLoc) return "Distance unavailable";
-      
-      const R = 6371; // km
-      const toRad = (x: number) => (x * Math.PI) / 180;
+  const calculateGarageDistance = (gLatitude: number, gLongitude: number): string => {
+    if (!userLoc) return "Distance unavailable";
 
-      const dLat = toRad(userLoc.coords.lat - gLatitude);
-      const dLon = toRad(userLoc.coords.long - gLongitude);
+    const R = 6371; // km
+    const toRad = (x: number) => (x * Math.PI) / 180;
 
-      
-      const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(toRad(userLoc.coords.lat)) * Math.cos(toRad(gLatitude)) * Math.sin(dLon / 2) ** 2;
+    const dLat = toRad(userLoc.coords.lat - gLatitude);
+    const dLon = toRad(userLoc.coords.long - gLongitude);
 
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-      const distance = R * c;
-      return `${distance.toFixed(1)} km away`;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(userLoc.coords.lat)) * Math.cos(toRad(gLatitude)) * Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c;
+    return `${distance.toFixed(1)} km away`;
   }
 
-    const findNearestGarageForService = (serviceName: string) => {
+  const findNearestGarageForService = (serviceName: string) => {
     if (!userLoc || garages.length === 0) return null;
 
     const keyword = SERVICE_KEYWORDS[serviceName];
@@ -131,7 +131,7 @@ export default  function HomeScreen() {
         nearest = g;
       }
     }
-    
+
     return nearest;
   };
 
@@ -153,23 +153,23 @@ export default  function HomeScreen() {
   // API Caller to retrieve garages from firestore
   useEffect(() => {
 
-    if(!userLoc) {
+    if (!userLoc) {
       return;
     }
 
-    
+
     const querySnapshot = async () => {
       // Define query
       // const dbQ= query(
       //       collection(db, "serviceGarages"),
       //       where('Town', '==', userLoc?.town.city))
 
-      const dbQ= query(
-            collection(db, "serviceGarages"))
+      const dbQ = query(
+        collection(db, "serviceGarages"))
 
       const querySnapshot = await getDocs(dbQ);
       const garages: Garage[] = [];
-      if (querySnapshot){
+      if (querySnapshot) {
         querySnapshot.forEach((doc) => {
           garages.push(doc.data() as Garage);
         });
@@ -184,23 +184,23 @@ export default  function HomeScreen() {
   // Retrive user's location details
   useEffect(() => {
     let loc;
-    const retrieveUserLocation =  async () => {
+    const retrieveUserLocation = async () => {
       loc = await GetUserTownAndLocation();
       // console.log(`Retrieved loc ${loc?.town.city}`)
       setUserLoc(loc);
     }
-    
+
 
     retrieveUserLocation();
   }, [])
 
   // Check if user is logged in
-  useEffect( () => {
+  useEffect(() => {
     const checkLogin = async () => {
-      const loggedIn : boolean = await getLoginSession();
-      if (!loggedIn){
+      const loggedIn: boolean = await getLoginSession();
+      if (!loggedIn) {
         navigation.setOptions({
-           headerBackVisible: false,
+          headerBackVisible: false,
         });
         // navigation.navigate("Login");
       }
@@ -208,120 +208,118 @@ export default  function HomeScreen() {
 
     checkLogin();
   }, [])
+
+  async function registerForPushNotifsAndSaveName() {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== "granted") {
+      return null;
+    }
+    const token = ((await Notifications.getExpoPushTokenAsync()).data);
+
+    let q = query(collection(db, "devices"), where("token", "==", token));
+    if ((await getDocs(q)).empty) {
+      await addDoc(collection(db, "devices"), {
+        token: token
+      });
+    }
+    q = query(collection(db, "devices"), where("token", "==", token));
+    let docs = await getDocs(q);
+
+    saveName({ name: docs.docs[0].id });
+    // console.log((await getName())[0].name);
+    return (await getName())[0].name;
+  }
+
   return (
     <View>
-        <Navbar />
-<FlatList
-  style={{ backgroundColor: 'white' }}
-  data={garages}
-  contentContainerStyle={{ paddingBottom: 40 }}
-  ListHeaderComponent={
-    <>
-    
-      <View style={{ paddingTop: 90 }} />
+      <Navbar />
+      <FlatList
+        style={{ backgroundColor: 'white' }}
+        data={garages}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        ListHeaderComponent={
+          <>
 
-      <ImageBackground
-        source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')}
-        resizeMode="cover"
-        style={styles.quickServicesContainer}
-      >
-        <Text style={styles.smallTitle}>Quick Service</Text>
+            <View style={{ paddingTop: 90 }} />
 
-        <FlatList
-          data={quickServices}
-          numColumns={3}
-          scrollEnabled={false}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.quickServiceOption}
-              onPress={() => {
-                const nearest = findNearestGarageForService(item.name);
-                if (!nearest) return alert('No garage nearby.');
-                navigation.navigate('StorePage', { garage: nearest });
-              }}
+            <ImageBackground
+              source={require('../../MediaSources/Backgrounds/quickservicebg.jpg')}
+              resizeMode="cover"
+              style={styles.quickServicesContainer}
             >
-              <Image style={styles.quickServiceOptionImage} source={item.src} />
-              <Text>{item.name}</Text>
-            </TouchableOpacity>
-          )}
-        />
-      </ImageBackground>
+              <Text style={styles.smallTitle}>Quick Service</Text>
 
-      <View style={{ margin: 10 }}>
-        <Text style={{ fontSize: 35, fontWeight: '800' }}>
-          Available Nearby
-        </Text>
-        <Text style={{fontWeight: 900, fontSize: 15}}>Based on your location.</Text>
-        <Text style={{fontWeight: 900, fontSize: 15}}>Your Current Town: {userLoc ? userLoc.town.city : ''} </Text>
-      </View>
-    </>
-  }
-  renderItem={({ item: garage }) => (
-   <TouchableOpacity
-      style={styles.serviceContainer}
-      onPress={() => navigation.navigate('StorePage', { garage })}
-    >
-      <Image
-        style={styles.servicesImage}
-        source={garageImages[garage.Id]}
+              <FlatList
+                data={quickServices}
+                numColumns={3}
+                scrollEnabled={false}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.quickServiceOption}
+                    onPress={() => {
+                      const nearest = findNearestGarageForService(item.name);
+                      if (!nearest) return alert('No garage nearby.');
+                      navigation.navigate('StorePage', { garage: nearest });
+                    }}
+                  >
+                    <Image style={styles.quickServiceOptionImage} source={item.src} />
+                    <Text>{item.name}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </ImageBackground>
+
+            <View style={{ margin: 10 }}>
+              <Text style={{ fontSize: 35, fontWeight: '800' }}>
+                Available Nearby
+              </Text>
+              <Text style={{ fontWeight: 900, fontSize: 15 }}>Based on your location.</Text>
+              <Text style={{ fontWeight: 900, fontSize: 15 }}>Your Current Town: {userLoc ? userLoc.town.city : ''} </Text>
+            </View>
+          </>
+        }
+        renderItem={({ item: garage }) => (
+          <TouchableOpacity
+            style={styles.serviceContainer}
+            onPress={() => navigation.navigate('StorePage', { garage })}
+          >
+            <Image
+              style={styles.servicesImage}
+              source={garageImages[garage.Id]}
+            />
+
+            <View style={styles.serviceInfo}>
+              <Text style={{ fontSize: 22, fontWeight: '900' }}>
+                {garage.Name}
+              </Text>
+
+              <Text>{garage.Town}{garage.ElectricService ? <Text style={{ "color": "blue" }}> • Electric Service </Text> : null} </Text>
+              <Text style={{ fontWeight: 900 }}></Text>
+
+              <Text numberOfLines={2}>
+                {Object.keys(garage.Services).slice(0, 3).join(' | ')}
+              </Text>
+
+              <Text style={{ fontWeight: '800' }}>
+                {calculateGarageDistance(
+                  garage.Coordinates.latitude,
+                  garage.Coordinates.longitude
+                )}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
       />
-
-      <View style={styles.serviceInfo}>
-        <Text style={{ fontSize: 22, fontWeight: '900' }}>
-          {garage.Name}
-        </Text>
-
-        <Text>{garage.Town}{garage.ElectricService ? <Text style={{"color": "blue"}}> • Electric Service </Text> : null} </Text>
-        <Text style={{fontWeight: 900}}></Text>
-
-        <Text numberOfLines={2}>
-          {Object.keys(garage.Services).slice(0, 3).join(' | ')}
-        </Text>
-
-        <Text style={{ fontWeight: '800' }}>
-          {calculateGarageDistance(
-            garage.Coordinates.latitude,
-            garage.Coordinates.longitude
-          )}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  )}
-/>
-</View>
+    </View>
 
 
   );
-}
-
-
-  
-async function registerForPushNotifsAndSaveName(){
-  const {status: existingStatus} = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-  if(existingStatus!== "granted"){
-    const {status} = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-  if (finalStatus !== "granted"){
-    Alert.alert("Unable to grant notification access");
-    return null;
-  }
-  const token = ((await Notifications.getExpoPushTokenAsync()).data);
-  
-  let q = query(collection(db,"devices"),where("token","==",token));
-  if ((await getDocs(q)).empty){
-    await addDoc(collection(db, "devices"),{
-      token:token
-    });
-  }
-  q = query(collection(db,"devices"),where("token","==",token));
-  let docs = await getDocs(q);
-  
-  saveName({name: docs.docs[0].id});
-  // console.log((await getName())[0].name);
-  return (await getName())[0].name;
 }
 
 const styles = StyleSheet.create({
@@ -330,14 +328,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  searchBarContainer:{
+  searchBarContainer: {
     width: "100%",
     height: 100,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
   },
-  searchBar:{
+  searchBar: {
     width: '75%',
     height: 60,
     color: 'black',
@@ -349,7 +347,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 20,
     shadowColor: 'black',
-    shadowOffset: {width: 0, height: 5},
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 10,
@@ -358,13 +356,13 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 8,
   },
-  quickServices:{
+  quickServices: {
     display: 'flex',
     flexDirection: 'row',
     width: '100%',
     gap: 5,
   },
-  quickServicesContainer: { 
+  quickServicesContainer: {
     height: 250,
     padding: 16.5,
     backgroundColor: 'lightgray',
@@ -375,18 +373,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
     shadowColor: 'black',
-    shadowOffset: {width: 0, height: 5},
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 10,
   },
-    smallTitle:{
+  smallTitle: {
     fontSize: 30,
     fontWeight: '600',
     letterSpacing: 2,
     color: 'white',
   },
-  quickServiceOption:{
+  quickServiceOption: {
     margin: 10,
     backgroundColor: '#FFBD71',
     width: '27.5%',
@@ -397,11 +395,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     fontWeight: '600',
   },
-  quickServiceOptionText:{
+  quickServiceOptionText: {
     fontSize: 16,
     fontWeight: '600',
   },
-  quickServiceOptionImage:{
+  quickServiceOptionImage: {
     width: '80%',
     height: '60%'
   },
@@ -412,7 +410,7 @@ const styles = StyleSheet.create({
     left: 0,
     position: 'absolute',
   },
-  servicesContainer:{
+  servicesContainer: {
     height: 100,
     overflowY: 'scroll',
     backgroundColor: 'white',
@@ -421,22 +419,22 @@ const styles = StyleSheet.create({
     color: 'black',
     margin: 10,
   },
-  servicesContent:{
-      marginTop: 20,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 10,
-      width: '90%',
-      alignSelf: 'center'
+  servicesContent: {
+    marginTop: 20,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
+    width: '90%',
+    alignSelf: 'center'
   },
-  serviceContainer:{
+  serviceContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
     zIndex: -999,
     height: 150,
     backgroundColor: '#f2f2f2f2',
-    borderRadius: 10, 
+    borderRadius: 10,
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
@@ -445,17 +443,17 @@ const styles = StyleSheet.create({
     gap: 0
   },
 
-  servicesImage:{
+  servicesImage: {
     width: '40%',
     height: '90%',
     borderRadius: 20,
     shadowColor: 'black',
-    shadowOffset: {width: 0, height: 5},
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 10,
   },
-  serviceInfo:{ 
+  serviceInfo: {
     display: 'flex',
     flexDirection: 'column',
     padding: 10,
