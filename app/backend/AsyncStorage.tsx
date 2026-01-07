@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import saveNewCar from "./FirestoreMedium";
+// import saveNewCar from "./FirestoreMedium";
 export type FuelType = "Petrol" | "Diesel";
 export type EngineType = "Electric" | "Gas";
 
@@ -19,7 +19,6 @@ export async function saveUserCarDetails(body: UserCarDetails){
     // Save details on async storage
     console.log("saving details")
 
-    await saveNewCar()
     await AsyncStorage.setItem("details", JSON.stringify(body));
 
     // Get details
@@ -30,13 +29,18 @@ export async function saveUserCarDetails(body: UserCarDetails){
     console.log(`${data.model}, ${data.engineType}, ${data.fuelType}`)
 }
 
-export async function setLoginSession() {
-    await AsyncStorage.setItem("hasLoggedIn", JSON.stringify(true));
+export async function setLoginSession(status: boolean) {
+    await AsyncStorage.setItem("hasLoggedIn", JSON.stringify(status));
 }
 
-export async function getLoginSession() {
+export async function getLoginSession(){
     const session = await AsyncStorage.getItem("hasLoggedIn");
-    return session ? true : false;
+    if (session === null ){
+        console.log('return false');
+        return false;
+    }
+    console.log('return true apparently');
+    return true;
 }
 
 // Dummy export to silence route warning - this is not a route file

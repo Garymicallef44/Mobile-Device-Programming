@@ -1,7 +1,7 @@
 import { useRoute } from "@react-navigation/native";
 import { useStripe } from "@stripe/stripe-react-native";
 import * as Location from "expo-location";
-import { useRouter } from "expo-router";
+import { useRouter, Stack } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 import MapView, { MapPressEvent, Marker, Region } from "react-native-maps";
-import { saveItem } from "../services/storage";
+import { getName, saveItem } from "../services/storage";
 import { getUserCarDetails } from "./backend/AsyncStorage";
 import { GetTownAndStreet } from "./backend/UserLocationService";
 
@@ -155,6 +155,7 @@ export default function OrderDetailsPage() {
     const car = await Promise.resolve(getUserCarDetails());
     if (!car) return alert("Please add a car before placing an order.");
 
+    if(!getUserCarDetails()) return alert("Please enter your car details.");
     if (!phone) return alert("Please enter phone number");
     if (!gps) return alert("Please select a location on the map");
 
@@ -197,46 +198,63 @@ export default function OrderDetailsPage() {
 
       const payment = await stripe.presentPaymentSheet();
 
-      if (payment.error) {
-        alert(payment.error.message ?? "Payment failed");
-        return;
-      }
+if (payment.error) {
+  alert(payment.error.message ?? "Payment failed");
+  return;
+}
 
-      // ✅ Payment succeeded — save order + navigate to confirmation
-      const serviceStr = buildServiceStr();
+// ✅ Payment succeeded
+const serviceStr = buildServiceStr();
 
-      saveItem({
-        name: serviceStr,
-        garageName: garage?.Name,
-        date: new Date(),
-        price: price.toFixed(2),
-      });
+saveItem({
+  name: serviceStr,
+  garageName: garage?.Name,
+  date: new Date(),
+  price: price.toFixed(2),
+});
 
-      const mode = requiresGarageVisit ? "garage" : "mobile";
-      const locationTextToPass = requiresGarageVisit
-        ? `${garage?.Town ?? garage?.city ?? ""} ${garage?.Location ?? garage?.location ?? ""}`.trim()
-        : (locationText || `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`);
+// Send notification (from main branch logic)
+const name = await getName();
+sendNotif(name, "Servify", "You have paid €" + price.toFixed(2));
 
-      router.replace({
-        pathname: "/confirmation",
-        params: {
-          total: price.toFixed(2),
-          garageName: garage?.Name ?? "",
-          services: serviceStr,
-          mode,
-          locationText: locationTextToPass,
-        },
-      });
-    } catch (err) {
-      console.log("Payment error:", err);
-      alert("Something went wrong during payment. Please try again.");
-    } finally {
-      setPaying(false);
+const mode = requiresGarageVisit ? "garage" : "mobile";
+const locationTextToPass = requiresGarageVisit
+  ? `${garage?.Town ?? garage?.city ?? ""} ${garage?.Location ?? garage?.location ?? ""}`.trim()
+  : (locationText || `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`);
+
+router.replace({
+  pathname: "/confirmation",
+  params: {
+    total: price.toFixed(2),
+    garageName: garage?.Name ?? "",
+    services: serviceStr,
+    mode,
+    locationText: locationTextToPass,
+  },
+});
     }
   };
-
+  const sendNotif = async (id:string,title:string,message:string)=>{
+  try{
+    const response = await fetch("http://10.0.2.2:3000/send-notif",{
+      method:"POST",
+      headers:{"Content-Type": "application/json"},
+      body: JSON.stringify({
+        id:id,
+        title:title,
+        msg:message,
+        
+      }),
+    });
+    console.log(response);
+    const data= await response.json();
+  }catch(err){
+    console.error("Error sending notification:",err);
+  }
+};
   return (
     <>
+      <Stack.Screen options={{ title: "Garages Near You" }} />
       <ScrollView style={styles.container}>
         <Text style={styles.title}>Order Details</Text>
 

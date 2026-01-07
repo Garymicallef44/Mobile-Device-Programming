@@ -1,11 +1,11 @@
 import { auth } from '@/firebaseConfig';
 import {
-  User,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-  updateProfile
+    User,
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut,
+    updateProfile
 } from 'firebase/auth';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
