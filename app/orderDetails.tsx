@@ -39,20 +39,16 @@ export default function OrderDetailsPage() {
     longitudeDelta: 0.01,
   });
 
-  // UI states
   const [paying, setPaying] = useState(false);
   const [locationText, setLocationText] = useState<string>("");
   const [resolvingLocation, setResolvingLocation] = useState(false);
 
-  // Ask for location permission on mount (only when mobile service)
   useEffect(() => {
     if (!requiresGarageVisit) {
       requestLocation();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requiresGarageVisit]);
 
-  // If a garage visit is required, pin map to garage
   useEffect(() => {
     if (requiresGarageVisit && garage?.Coordinates) {
       updateMapToLocation(
@@ -60,7 +56,6 @@ export default function OrderDetailsPage() {
         garage.Coordinates.longitude
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requiresGarageVisit, garage]);
 
   const requestLocation = async () => {
@@ -81,7 +76,7 @@ export default function OrderDetailsPage() {
       });
 
       updateMapToLocation(loc.coords.latitude, loc.coords.longitude);
-    } catch (e) {
+    } catch {
       alert("Failed to get location. Please try again.");
     }
   };
@@ -93,17 +88,14 @@ export default function OrderDetailsPage() {
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     });
-
     setGps({ lat, lng });
   };
 
-  // When user taps the map (only mobile service)
   const onMapPress = (event: MapPressEvent) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     updateMapToLocation(latitude, longitude);
   };
 
-  // Resolve address text when gps changes (avoid rendering a Promise / repeated calls)
   useEffect(() => {
     let cancelled = false;
 
@@ -113,7 +105,6 @@ export default function OrderDetailsPage() {
         return;
       }
 
-      // For garage visit, display garage info instead of reverse geocoding
       if (requiresGarageVisit) {
         const gTown = garage?.Town ?? garage?.city ?? "";
         const gLoc = garage?.Location ?? garage?.location ?? "";
@@ -126,7 +117,10 @@ export default function OrderDetailsPage() {
         const txt = await GetTownAndStreet(gps.lat, gps.lng);
         if (!cancelled) setLocationText(String(txt ?? ""));
       } catch {
-        if (!cancelled) setLocationText(`${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`);
+        if (!cancelled)
+          setLocationText(
+            `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`
+          );
       } finally {
         if (!cancelled) setResolvingLocation(false);
       }
@@ -141,117 +135,101 @@ export default function OrderDetailsPage() {
   const buildServiceStr = () => {
     if (!services || services.length === 0) return "";
     if (services.length === 1) return services[0].name;
-
     const names = services.map((s: any) => s.name);
     const last = names.pop();
     return `${names.join(", ")} and ${last}`;
   };
 
-  // PAYMENT
   const payNow = async () => {
     if (paying) return;
 
-    // AsyncStorage functions are usually async — handle both cases safely
     const car = await Promise.resolve(getUserCarDetails());
     if (!car) return alert("Please add a car before placing an order.");
 
-    if(!getUserCarDetails()) return alert("Please enter your car details.");
+    if (!getUserCarDetails())
+      return alert("Please enter your car details.");
     if (!phone) return alert("Please enter phone number");
     if (!gps) return alert("Please select a location on the map");
 
     setPaying(true);
 
     try {
-      // NOTE: 10.0.2.2 works on Android emulator only.
-      // If you are using a real phone, change this to your PC LAN IP or use ngrok.
-      const response = await fetch("http://10.0.2.2:3000/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ price }),
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        console.log("PaymentIntent HTTP error:", response.status, errText);
-        alert("Failed to start payment. Please try again.");
-        return;
-      }
+      const response = await fetch(
+        "http://10.0.2.2:3000/create-payment-intent",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ price }),
+        }
+      );
 
       const json = await response.json();
       const clientSecret = json.clientSecret;
-
-      if (!clientSecret) {
-        alert("Payment setup failed: missing client secret.");
-        return;
-      }
 
       const initSheet = await stripe.initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: "Garage Services",
       });
 
-      if (initSheet.error) {
-        console.log("initPaymentSheet error:", initSheet.error);
-        alert(initSheet.error.message ?? "Error initializing payment");
+      const payment = await stripe.presentPaymentSheet();
+
+      if (payment.error) {
+        alert(payment.error.message ?? "Payment failed");
         return;
       }
 
-      const payment = await stripe.presentPaymentSheet();
+      const serviceStr = buildServiceStr();
 
-if (payment.error) {
-  alert(payment.error.message ?? "Payment failed");
-  return;
-}
+      saveItem({
+        name: serviceStr,
+        garageName: garage?.Name,
+        date: new Date(),
+        price: price.toFixed(2),
+      });
 
-// ✅ Payment succeeded
-const serviceStr = buildServiceStr();
+      const name = await getName();
+      sendNotif(name, "Servify", "You have paid €" + price.toFixed(2));
 
-saveItem({
-  name: serviceStr,
-  garageName: garage?.Name,
-  date: new Date(),
-  price: price.toFixed(2),
-});
+      const mode = requiresGarageVisit ? "garage" : "mobile";
+      const locationTextToPass = requiresGarageVisit
+        ? `${garage?.Town ?? garage?.city ?? ""} ${
+            garage?.Location ?? garage?.location ?? ""
+          }`.trim()
+        : locationText || `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`;
 
-// Send notification (from main branch logic)
-const name = await getName();
-sendNotif(name, "Servify", "You have paid €" + price.toFixed(2));
-
-const mode = requiresGarageVisit ? "garage" : "mobile";
-const locationTextToPass = requiresGarageVisit
-  ? `${garage?.Town ?? garage?.city ?? ""} ${garage?.Location ?? garage?.location ?? ""}`.trim()
-  : (locationText || `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`);
-
-router.replace({
-  pathname: "/confirmation",
-  params: {
-    total: price.toFixed(2),
-    garageName: garage?.Name ?? "",
-    services: serviceStr,
-    mode,
-    locationText: locationTextToPass,
-  },
-});
+      router.replace({
+        pathname: "/confirmation",
+        params: {
+          total: price.toFixed(2),
+          garageName: garage?.Name ?? "",
+          services: serviceStr,
+          mode,
+          locationText: locationTextToPass,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPaying(false);
     }
   };
-  const sendNotif = async (id:string,title:string,message:string)=>{
-  try{
-    const response = await fetch("http://10.0.2.2:3000/send-notif",{
-      method:"POST",
-      headers:{"Content-Type": "application/json"},
-      body: JSON.stringify({
-        id:id,
-        title:title,
-        msg:message,
-        
-      }),
-    });
-    console.log(response);
-    const data= await response.json();
-  }catch(err){
-    console.error("Error sending notification:",err);
-  }
-};
+
+  const sendNotif = async (
+    id: string,
+    title: string,
+    message: string
+  ) => {
+    try {
+      await fetch("http://10.0.2.2:3000/send-notif", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, title, msg: message }),
+      });
+    } catch (err) {
+      console.error("Error sending notification:", err);
+    }
+  };
+
   return (
     <>
       <Stack.Screen options={{ title: "Garages Near You" }} />
