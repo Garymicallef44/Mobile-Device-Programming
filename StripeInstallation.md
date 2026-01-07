@@ -193,7 +193,7 @@ import { StripeProvider } from "@stripe/stripe-react-native";
 
 export default function RootLayout() {
   return (
-    <StripeProvider publishableKey="pk_test_123YOURKEY">
+    <StripeProvider publishableKey="">
       <Stack />
     </StripeProvider>
   );
