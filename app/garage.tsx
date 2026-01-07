@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
-import { useNavigation } from "expo-router";
+import { Stack, useNavigation } from "expo-router";
 import { getUserCarDetails, saveUserCarDetails, UserCarDetails } from "./backend/AsyncStorage";
 
 
@@ -37,6 +37,12 @@ const [extraDetail, setExtraDetail] = useState<string>("");
   return (
     <>
 
+    <Stack.Screen
+    options={{
+      title: "Garage",
+      headerBackTitle: "Back",
+    }}
+  />
     <ScrollView
     style={{ flex: 1, backgroundColor: "#fff" }}
     contentContainerStyle={{ paddingBottom: 60 }}>

@@ -1,7 +1,7 @@
 import { useRoute } from "@react-navigation/native";
 import { useStripe } from "@stripe/stripe-react-native";
 import * as Location from "expo-location";
-import { useRouter, Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -232,7 +232,7 @@ export default function OrderDetailsPage() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Garages Near You" }} />
+      <Stack.Screen options={{ title: "Garages Near You", headerBackTitle: "Back" }} />
       <ScrollView style={styles.container}>
         <Text style={styles.title}>Order Details</Text>
 
