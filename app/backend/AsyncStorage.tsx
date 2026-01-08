@@ -11,14 +11,10 @@ export type UserCarDetails = {
   fuelType: FuelType | null;
 };
 
-export async function saveUserId(){
-    
-}
 
+// Save car details
 export async function saveUserCarDetails(body: UserCarDetails){
     // Save details on async storage
-    console.log("saving details")
-
     await AsyncStorage.setItem("details", JSON.stringify(body));
 
     // Get details
@@ -29,17 +25,19 @@ export async function saveUserCarDetails(body: UserCarDetails){
     console.log(`${data.model}, ${data.engineType}, ${data.fuelType}`)
 }
 
+// Assign login session when user signs in successfully
 export async function setLoginSession(status: boolean) {
     await AsyncStorage.setItem("hasLoggedIn", JSON.stringify(status));
 }
 
+// Check if user login session is active
 export async function getLoginSession(){
+    // Retrieve value of hasLoggedIn from session storage
     const session = await AsyncStorage.getItem("hasLoggedIn");
+    
     if (session === null ){
-        console.log('return false');
         return false;
     }
-    console.log('return true apparently');
     return true;
 }
 
