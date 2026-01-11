@@ -27,6 +27,7 @@ export default function SearchPage() {
 
   const navigation = useNavigation<any>();
 
+  // Define garage media url
   const garageImages: Record<number, any> = {
     1: require("../../MediaSources/AutoShops/1.jpg"),
     2: require("../../MediaSources/AutoShops/2.jpg"),
@@ -36,6 +37,7 @@ export default function SearchPage() {
   };
 
   useEffect(() => {
+    // Get user location
     const loadLoc = async () => {
       const loc = await GetUserTownAndLocation();
       setUserLoc(loc);
@@ -45,8 +47,10 @@ export default function SearchPage() {
   }, []);
 
   useEffect(() => {
+    // If no user location, return
     if (!userLoc) return;
 
+    // Load garages available 
     const loadGarages = async () => {
       const dbQ = query(collection(db, "serviceGarages"));
       const snap = await getDocs(dbQ);
@@ -60,10 +64,16 @@ export default function SearchPage() {
     loadGarages();
   }, [userLoc]);
 
+  // Filter search results based on keywords inputted
   const filtered = useMemo(() => {
+    // get query string
     const q = queryText.trim().toLowerCase();
+    // If there is no query, return all garages
     if (!q) return garages;
 
+    // Get garages and filter by the Name, Town or services if any of them
+    // match the keywords.
+    
     return garages.filter(g =>
       g.Name.toLowerCase().includes(q) ||
       g.Town.toLowerCase().includes(q) ||

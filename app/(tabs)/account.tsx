@@ -17,7 +17,9 @@ import { setLoginSession } from '../backend/AsyncStorage';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function AccountScreen() {
+  // Auth context object
   const authContext = useAuth();
+  // Navigator object
   const navigation = useNavigation<any>();
   const { user, signIn, signUp, logout } = authContext;
   
@@ -35,15 +37,16 @@ export default function AccountScreen() {
   const [displayName, setDisplayName] = useState('');
 
   const handleAuth = async () => {
-    console.log('handleAuth called, isLogin:', isLogin);
-    console.log('Email:', email, 'Password length:', password.length);
-    
+
+    // If No email or password has been entered
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
+    // If user isn't logging in
     if (!isLogin) {
+    
       if (password !== confirmPassword) {
         Alert.alert('Error', 'Passwords do not match');
         return;
@@ -54,17 +57,17 @@ export default function AccountScreen() {
       }
     }
 
-    console.log('Starting auth process...');
     setLoading(true);
     try {
+      // If user is logging in
       if (isLogin) {
-        console.log('Calling signIn...');
+        // Send sign in request
         await signIn(email, password);
-        console.log('signIn completed');
+         
       } else {
-        console.log('Calling signUp...');
+        // send sign up request
         await signUp(email, password, displayName);
-        console.log('signUp completed');
+        // Navigate to garage details page
         navigation.navigate("garage");
       }
       // Clear form on success
@@ -72,8 +75,9 @@ export default function AccountScreen() {
       setPassword('');
       setConfirmPassword('');
       setDisplayName('');
-      console.log('Form cleared');
+ 
     } catch (error: any) {
+      // Match error messages
       switch(error.message){
         case "Firebase: Error (auth/invalid-credential).": Alert.alert("Invalid Credential", "Make sure you enter the correct email address or password.");
          case "Firebase: Password should be at least 6 characters (auth/weak-password).": Alert.alert("Weak Password", "Ensure that your password contains at least 6 characters.");

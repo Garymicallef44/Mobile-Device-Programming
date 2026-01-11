@@ -21,7 +21,9 @@ const [extraDetail, setExtraDetail] = useState<string>("");
   
   useEffect(() => {
   (async () => {
+    // Get user car details
     const data = await getUserCarDetails();
+    // If no car details are inputted, return
     if (!data) return;
 
     setCarModel(data.model);

@@ -12,7 +12,7 @@ export default function HistoryPage() {
 
   const [items, setItems] = useState([]);
   useFocusEffect(useCallback(() => {
-
+    // load data
     const loadData = async () => {
 
       const data = await getItems();
