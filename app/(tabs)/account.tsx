@@ -17,7 +17,9 @@ import { setLoginSession } from '../backend/AsyncStorage';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function AccountScreen() {
+  // Auth context object
   const authContext = useAuth();
+  // Navigator object
   const navigation = useNavigation<any>();
   const { user, signIn, signUp, logout } = authContext;
   
@@ -59,13 +61,13 @@ export default function AccountScreen() {
     try {
       // If user is logging in
       if (isLogin) {
-         
+        // Send sign in request
         await signIn(email, password);
          
       } else {
-         
+        // send sign up request
         await signUp(email, password, displayName);
-  
+        // Navigate to garage details page
         navigation.navigate("garage");
       }
       // Clear form on success
@@ -75,6 +77,7 @@ export default function AccountScreen() {
       setDisplayName('');
  
     } catch (error: any) {
+      // Match error messages
       switch(error.message){
         case "Firebase: Error (auth/invalid-credential).": Alert.alert("Invalid Credential", "Make sure you enter the correct email address or password.");
          case "Firebase: Password should be at least 6 characters (auth/weak-password).": Alert.alert("Weak Password", "Ensure that your password contains at least 6 characters.");

@@ -20,17 +20,24 @@ export default function HomeScreen() {
 
 
   useEffect(() => {
-    console.log("Running account check")
+    // Run account check
     const check = async () => {
+      // check if there is existing session
       const session = await getLoginSession();
+      // If no session 
       if (!session) {
+        // Navigate to the login page
         navigation.navigate("Login");
         return;
       }
 
+      // Get user car details
       const car = await getUserCarDetails();
 
+      // If no car details have been entered
       if (!car) {
+
+        // Navigate to car details page
         navigation.navigate("garage");
         return;
       }
@@ -39,15 +46,18 @@ export default function HomeScreen() {
     check();
   }, []);
 
+  // Service Type
   type Service = {
     Price: number;
     RequireGarage: boolean;
   };
 
+  // ServiceList type
   type ServicesList = {
     [serviceName: string]: Service;
   };
 
+  // Garage type
   type Garage = {
     Coordinates: GeoPoint;
     Description: string;
@@ -62,13 +72,17 @@ export default function HomeScreen() {
     Town: string;
   };
 
+  // Garages type for array
   type Garages = {
     garages: Garage[];
   }
 
-
+  // User location state
   const [userLoc, setUserLoc] = useState<UserLocation | null>();
+  // Garages retrieved state
   const [garages, setGarages] = useState<Garage[]>([]);
+
+
 
   const SERVICE_KEYWORDS: Record<string, string> = {
     "Car Wash": "wash",
@@ -76,7 +90,7 @@ export default function HomeScreen() {
     "Towing": "tow"
   };
 
-
+  // Quick services media mapper for logo
   const quickServices = [
     { id: 0, name: "Car Wash", src: require("../../MediaSources/Symbols/car-wash.png") },
     { id: 1, name: "Tyre Change", src: require("../../MediaSources/Symbols/tyrechange.png") },
@@ -84,8 +98,11 @@ export default function HomeScreen() {
   ]
 
 
+  // Calculate garage distance from user
   const calculateGarageDistance = (gLatitude: number, gLongitude: number): string => {
     if (!userLoc) return "Distance unavailable";
+
+    // Harvensine Equation
 
     const R = 6371; // km
     const toRad = (x: number) => (x * Math.PI) / 180;
@@ -103,17 +120,23 @@ export default function HomeScreen() {
     const distance = R * c;
     return `${distance.toFixed(1)} km away`;
   }
-
+  
+  // Retrieve nearest garage to user
   const findNearestGarageForService = (serviceName: string) => {
+    // If there is no user location or garages retrieved from DB, return nothing.
     if (!userLoc || garages.length === 0) return null;
 
+    // Search based on service keywords
     const keyword = SERVICE_KEYWORDS[serviceName];
+    // if no keywords return nothing
     if (!keyword) return null;
 
+    // Filter garage based on keywords
     const matching = garages.filter(g => {
       return Object.keys(g.Services).some(k => k.toLowerCase().includes(keyword));
     });
 
+    // If there are no garages that match the filter
     if (matching.length === 0) return null;
 
     let nearest = null;
@@ -153,31 +176,33 @@ export default function HomeScreen() {
   // API Caller to retrieve garages from firestore
   useEffect(() => {
 
+    // If there is no user location, return nothing
     if (!userLoc) {
       return;
     }
 
-
+    // Query Database
     const querySnapshot = async () => {
-      // Define query
-      // const dbQ= query(
-      //       collection(db, "serviceGarages"),
-      //       where('Town', '==', userLoc?.town.city))
-
+      // Create DB Query
       const dbQ = query(
         collection(db, "serviceGarages"))
 
+      // Request db for query
       const querySnapshot = await getDocs(dbQ);
       const garages: Garage[] = [];
+      
+      // Push each retrieved garage
       if (querySnapshot) {
         querySnapshot.forEach((doc) => {
+          // Parse retrieved data as a Garage type
           garages.push(doc.data() as Garage);
         });
       }
-      console.log(garages);
+      // Set garage state
       setGarages(garages);
     }
 
+    // Call query
     querySnapshot();
   }, [userLoc])
 
@@ -210,24 +235,39 @@ export default function HomeScreen() {
   }, [])
 
   async function registerForPushNotifsAndSaveName() {
+    // Get notifications permissions
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  
     let finalStatus = existingStatus;
+
+    // If permissions aren't granted
     if (existingStatus !== "granted") {
+      // Request for permission
       const { status } = await Notifications.requestPermissionsAsync();
+  
       finalStatus = status;
     }
+    // If the final status isn't granted
     if (finalStatus !== "granted") {
+      // Return nothing
       return null;
     }
+
     const token = ((await Notifications.getExpoPushTokenAsync()).data);
 
+    // Define query for device with token
     let q = query(collection(db, "devices"), where("token", "==", token));
+
+    // If no device exists in the db
     if ((await getDocs(q)).empty) {
+      // Create document in db with device token
       await addDoc(collection(db, "devices"), {
         token: token
       });
     }
+    // Define query again
     q = query(collection(db, "devices"), where("token", "==", token));
+    // Retrieve doc
     let docs = await getDocs(q);
 
     saveName({ name: docs.docs[0].id });

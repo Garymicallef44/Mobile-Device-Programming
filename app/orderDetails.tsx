@@ -25,13 +25,17 @@ export default function OrderDetailsPage() {
 
   const { garage, price, services } = route.params;
 
+  // Check if service selected for order requires user to go to garage.
   const requiresGarageVisit = useMemo(
     () => services.some((s: any) => s.RequireGarage === true),
     [services]
   );
 
+  // Phone number
   const [phone, setPhone] = useState("");
+  // GPS Location of service
   const [gps, setGps] = useState<{ lat: number; lng: number } | null>(null);
+  // Region of service
   const [region, setRegion] = useState<Region>({
     latitude: 35.8972,
     longitude: 14.5123,
@@ -39,18 +43,24 @@ export default function OrderDetailsPage() {
     longitudeDelta: 0.01,
   });
 
+  // User is paying state
   const [paying, setPaying] = useState(false);
+  // Location of service text
   const [locationText, setLocationText] = useState<string>("");
   const [resolvingLocation, setResolvingLocation] = useState(false);
 
+  // Check if overall service orders require garage visit
   useEffect(() => {
     if (!requiresGarageVisit) {
+      // If not, request location of user
       requestLocation();
     }
   }, [requiresGarageVisit]);
 
+  // Check if services require garage vist & the garage has coordinates
   useEffect(() => {
     if (requiresGarageVisit && garage?.Coordinates) {
+      // Update map to service location
       updateMapToLocation(
         garage.Coordinates.latitude,
         garage.Coordinates.longitude
@@ -58,70 +68,91 @@ export default function OrderDetailsPage() {
     }
   }, [requiresGarageVisit, garage]);
 
+  // Request user location
   const requestLocation = async () => {
     try {
       const { status } = await Location.getForegroundPermissionsAsync();
-
+      // If user hasn't granted access
       if (status !== "granted") {
+        // Request again
         const { status: newStatus } =
           await Location.requestForegroundPermissionsAsync();
         if (newStatus !== "granted") {
+          // Return if is granted
           alert("Location permission required.");
           return;
         }
       }
 
+      // Get user location 
       const loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
-
+      // Update live map location
       updateMapToLocation(loc.coords.latitude, loc.coords.longitude);
     } catch {
       alert("Failed to get location. Please try again.");
     }
   };
 
+  // Update map's location on order overview.
   const updateMapToLocation = (lat: number, lng: number) => {
+    // Sets location to respective latitude, longitude coordinates
     setRegion({
       latitude: lat,
       longitude: lng,
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     });
+    // Sets GPS state
     setGps({ lat, lng });
   };
 
+  // On press event listener for map
   const onMapPress = (event: MapPressEvent) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
+    // Update map location to pressed region
     updateMapToLocation(latitude, longitude);
   };
 
+
   useEffect(() => {
+
     let cancelled = false;
 
     const resolve = async () => {
+      // If no GPS location is provided
       if (!gps) {
+        // Set Location text to none
         setLocationText("");
         return;
       }
 
+      // If Services require garage visit
       if (requiresGarageVisit) {
+        // Update information of garage town and location
         const gTown = garage?.Town ?? garage?.city ?? "";
         const gLoc = garage?.Location ?? garage?.location ?? "";
+        // Display on order overview.
         setLocationText(`${gTown} ${gLoc}`.trim());
         return;
       }
 
+      
       setResolvingLocation(true);
       try {
+        // Get town and street of selected / pre-selected location
         const txt = await GetTownAndStreet(gps.lat, gps.lng);
+        // If user hasn't cancelled, set location text
         if (!cancelled) setLocationText(String(txt ?? ""));
       } catch {
+        // If user hasn't cancelled, set location coordinates
         if (!cancelled)
           setLocationText(
             `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`
           );
       } finally {
+        // Resolving location is complete
         if (!cancelled) setResolvingLocation(false);
       }
     };
@@ -132,28 +163,43 @@ export default function OrderDetailsPage() {
     };
   }, [gps, requiresGarageVisit, garage]);
 
+  // used to retrieve name of services
   const buildServiceStr = () => {
+    // Return nothing if no services
     if (!services || services.length === 0) return "";
+  
+    // If there are only 1 service, return just that name
     if (services.length === 1) return services[0].name;
+
+    // Through each service, return their name
     const names = services.map((s: any) => s.name);
     const last = names.pop();
+    // Return services
     return `${names.join(", ")} and ${last}`;
   };
 
+
   const payNow = async () => {
+    // If user is paying
     if (paying) return;
 
+    // Check if user has car details defined
     const car = await Promise.resolve(getUserCarDetails());
     if (!car) return alert("Please add a car before placing an order.");
 
+    // If user has not entered any car details
     if (!getUserCarDetails())
       return alert("Please enter your car details.");
+    // If user hasn't entered a phone number
     if (!phone) return alert("Please enter phone number");
+    // If user hasn't selected a location on map
     if (!gps) return alert("Please select a location on the map");
 
+    // Set paying state to true
     setPaying(true);
 
     try {
+      // Post Request to payment intent endpoint
       const response = await fetch(
         "http://10.0.2.2:3000/create-payment-intent",
         {
@@ -163,6 +209,7 @@ export default function OrderDetailsPage() {
         }
       );
 
+      // get JSON format of response
       const json = await response.json();
       const clientSecret = json.clientSecret;
 
@@ -171,15 +218,19 @@ export default function OrderDetailsPage() {
         merchantDisplayName: "Garage Services",
       });
 
+      // Request payment sheet from stripe
       const payment = await stripe.presentPaymentSheet();
 
+      // If payment has failed
       if (payment.error) {
         alert(payment.error.message ?? "Payment failed");
         return;
       }
 
+      // Get service string representations
       const serviceStr = buildServiceStr();
 
+      // Save item
       saveItem({
         name: serviceStr,
         garageName: garage?.Name,
@@ -187,16 +238,22 @@ export default function OrderDetailsPage() {
         price: price.toFixed(2),
       });
 
+      
       const name = await getName();
+
+      // Provide price paid
       sendNotif(name, "Servify", "You have paid €" + price.toFixed(2));
 
+      // Set mode based if user has to visit garage
       const mode = requiresGarageVisit ? "garage" : "mobile";
+      // Pass Garage location if garage visit is needed
       const locationTextToPass = requiresGarageVisit
         ? `${garage?.Town ?? garage?.city ?? ""} ${
             garage?.Location ?? garage?.location ?? ""
           }`.trim()
         : locationText || `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}`;
 
+      // Reroute user to confirmation page
       router.replace({
         pathname: "/confirmation",
         params: {
@@ -220,6 +277,7 @@ export default function OrderDetailsPage() {
     message: string
   ) => {
     try {
+      
       await fetch("http://10.0.2.2:3000/send-notif", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

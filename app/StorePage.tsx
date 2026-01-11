@@ -57,10 +57,14 @@ export default function ServicePage() {
 
   const [price, setPrice] = useState<number>(0);
 
+  // Toggle select for service
   const toggleSelect = (p: number, id: number) => {
+    // If service already included of those included
+    // Remove
     if (selected.includes(id)){
       setSelected(prev => prev.filter(x => x !== id))
       setPrice(price - p)
+    // else add to selected list 
     }else {
       setSelected(prev => [...prev, id])
       setPrice(price + p)
@@ -68,14 +72,19 @@ export default function ServicePage() {
 
   };
 
+  // Run on load
   useEffect(() => {
     const run = async () => {
+      // Get car details
       const carDetails = await getUserCarDetails();
 
+      // If user has no car details
       if(!carDetails){
         alert("Please enter your car details to proceed with ordering.");
+        // Navigate for user to input car details
         navigation.navigate("garage");
       }else{
+        // Set car as electric
         setIsElectric(carDetails.engineType === "Electric");
       }
     }
