@@ -163,6 +163,7 @@ export default function AccountScreenLogin() {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
+         <Text style={{fontSize: 50, fontWeight: 'bold', textAlign: 'center', marginVertical: 20}}>Servify</Text>
         <View style={styles.formContainer}>
           <View style={styles.header}>
             <Ionicons name="person-circle" size={80} color="#FFBD71" />
